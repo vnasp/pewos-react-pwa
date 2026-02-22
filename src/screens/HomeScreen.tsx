@@ -1,20 +1,28 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { CheckCircle2, Circle, Calendar, Pill, Dumbbell } from "lucide-react";
-import { useCalendar, appointmentTypeLabels } from "../context/CalendarContext";
+import { useCalendar } from "../context/CalendarContext";
 import { useMedication } from "../context/MedicationContext";
-import { useExercise, exerciseTypeLabels } from "../context/ExerciseContext";
+import { useExercise } from "../context/ExerciseContext";
+import { useCare } from "../context/CareContext";
+import { useDogs } from "../context/DogsContext";
+import ConfettiEffect from "../components/ConfettiEffect";
+import QuickAccess from "../components/home/QuickAccess";
+import DogFilterTabs from "../components/home/DogFilterTabs";
+import EventsList from "../components/home/EventsList";
+import type { HomeEvent } from "../components/home/types";
 import type { Completion } from "../types";
 
 interface HomeScreenProps {
   onNavigateToMedications: () => void;
   onNavigateToCalendar: () => void;
   onNavigateToExercises: () => void;
+  onNavigateToCares: () => void;
 }
 
 export default function HomeScreen({
   onNavigateToMedications,
   onNavigateToCalendar,
   onNavigateToExercises,
+  onNavigateToCares,
 }: HomeScreenProps) {
   const {
     appointments,
@@ -31,9 +39,19 @@ export default function HomeScreen({
     markExerciseCompleted,
     getTodayCompletions: getExCompletions,
   } = useExercise();
+  const {
+    cares,
+    markCareCompleted,
+    getTodayCompletions: getCareCompletions,
+  } = useCare();
+  const { dogs } = useDogs();
   const [completions, setCompletions] = useState<
     Record<string, Completion | null>
   >({});
+  const [confetti, setConfetti] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
 
   const today = useMemo(() => {
     const d = new Date();
@@ -66,13 +84,26 @@ export default function HomeScreen({
   const todayMedications = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
+    const nowTs = now.getTime();
+    const MS_PER_DAY = 24 * 60 * 60 * 1000;
     return medications
       .filter((m) => {
         if (!m.isActive) return false;
         if (m.durationDays === 0) return true;
         const end = new Date(m.endDate);
         end.setHours(0, 0, 0, 0);
-        return end.getTime() >= now.getTime();
+        if (end.getTime() < nowTs) return false;
+        // Para medicamentos con intervalo > 24h verificar si hoy toca
+        if (m.frequencyHours && m.frequencyHours > 24) {
+          const start = new Date(m.startDate);
+          start.setHours(0, 0, 0, 0);
+          const daysSinceStart = Math.round(
+            (nowTs - start.getTime()) / MS_PER_DAY,
+          );
+          const intervalDays = Math.round(m.frequencyHours / 24);
+          if (daysSinceStart % intervalDays !== 0) return false;
+        }
+        return true;
       })
       .flatMap((m) =>
         m.scheduledTimes.map((time) => ({
@@ -114,13 +145,60 @@ export default function HomeScreen({
       );
   }, [exercises]);
 
+  const todayCares = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return cares
+      .filter((c) => {
+        if (!c.isActive) return false;
+        if (c.isPermanent) return true;
+        if (c.endDate) {
+          const end = new Date(c.endDate);
+          end.setHours(0, 0, 0, 0);
+          return end.getTime() >= now.getTime();
+        }
+        return true;
+      })
+      .flatMap((c) =>
+        c.scheduledTimes.map((time) => ({
+          type: "care" as const,
+          id: `${c.id}-${time}`,
+          dogName: c.dogName,
+          time,
+          careId: c.id,
+          scheduledTime: time,
+          data: c,
+        })),
+      );
+  }, [cares]);
+
   const allEvents = useMemo(
     () =>
-      [...todayAppointments, ...todayMedications, ...todayExercises].sort(
-        (a, b) => a.time.localeCompare(b.time),
-      ),
-    [todayAppointments, todayMedications, todayExercises],
+      [
+        ...todayAppointments,
+        ...todayMedications,
+        ...todayExercises,
+        ...todayCares,
+      ].sort((a, b) => a.time.localeCompare(b.time)),
+    [todayAppointments, todayMedications, todayExercises, todayCares],
   );
+
+  const filteredEvents = useMemo(
+    () =>
+      selectedDogId
+        ? allEvents.filter((ev) => ev.data.dogId === selectedDogId)
+        : allEvents,
+    [allEvents, selectedDogId],
+  );
+
+  // Conteo de recordatorios por perro para las pestañas
+  const countByDog = useMemo(() => {
+    const map: Record<string, number> = {};
+    allEvents.forEach((ev) => {
+      map[ev.data.dogId] = (map[ev.data.dogId] ?? 0) + 1;
+    });
+    return map;
+  }, [allEvents]);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,6 +215,12 @@ export default function HomeScreen({
             );
             return {
               key: `medication-${ev.medicationId}-${ev.scheduledTime}`,
+              completion: c,
+            };
+          } else if (ev.type === "care") {
+            const c = await getCareCompletions(ev.careId, ev.scheduledTime);
+            return {
+              key: `care-${ev.careId}-${ev.scheduledTime}`,
               completion: c,
             };
           } else {
@@ -162,7 +246,16 @@ export default function HomeScreen({
   }, [allEvents.length]);
 
   const handleToggle = useCallback(
-    async (ev: (typeof allEvents)[0]) => {
+    async (ev: HomeEvent, clickX: number, clickY: number) => {
+      const key = (() => {
+        if (ev.type === "appointment") return `appointment-${ev.data.id}`;
+        if (ev.type === "medication")
+          return `medication-${ev.medicationId}-${ev.scheduledTime}`;
+        if (ev.type === "care") return `care-${ev.careId}-${ev.scheduledTime}`;
+        return `exercise-${ev.exerciseId}-${ev.scheduledTime}`;
+      })();
+      const wasCompleted = !!completions[key];
+
       if (ev.type === "appointment") {
         await markAppointmentCompleted(ev.data.id, "");
         const c = await getApptCompletions(ev.data.id, "");
@@ -174,6 +267,13 @@ export default function HomeScreen({
           ...p,
           [`medication-${ev.medicationId}-${ev.scheduledTime}`]: c,
         }));
+      } else if (ev.type === "care") {
+        await markCareCompleted(ev.careId, ev.scheduledTime);
+        const c = await getCareCompletions(ev.careId, ev.scheduledTime);
+        setCompletions((p) => ({
+          ...p,
+          [`care-${ev.careId}-${ev.scheduledTime}`]: c,
+        }));
       } else {
         await markExerciseCompleted(ev.exerciseId, ev.scheduledTime);
         const c = await getExCompletions(ev.exerciseId, ev.scheduledTime);
@@ -182,143 +282,56 @@ export default function HomeScreen({
           [`exercise-${ev.exerciseId}-${ev.scheduledTime}`]: c,
         }));
       }
+
+      // Solo lanzar confetti al MARCAR como completado (no al desmarcar)
+      if (!wasCompleted) {
+        setConfetti({ x: clickX, y: clickY });
+      }
     },
     [
       markAppointmentCompleted,
       markMedicationCompleted,
       markExerciseCompleted,
+      markCareCompleted,
       getApptCompletions,
       getMedCompletions,
       getExCompletions,
+      getCareCompletions,
     ],
   );
 
-  const getKey = (ev: (typeof allEvents)[0]) => {
-    if (ev.type === "appointment") return `appointment-${ev.data.id}`;
-    if (ev.type === "medication")
-      return `medication-${ev.medicationId}-${ev.scheduledTime}`;
-    return `exercise-${ev.exerciseId}-${ev.scheduledTime}`;
-  };
-
-  const typeConfig = {
-    appointment: {
-      icon: Calendar,
-      bg: "bg-blue-100",
-      color: "text-blue-700",
-      label: (ev: any) => appointmentTypeLabels[ev.data.type] ?? ev.data.type,
-    },
-    medication: {
-      icon: Pill,
-      bg: "bg-pink-100",
-      color: "text-pink-700",
-      label: (ev: any) => ev.data.name,
-    },
-    exercise: {
-      icon: Dumbbell,
-      bg: "bg-green-100",
-      color: "text-green-700",
-      label: (ev: any) => exerciseTypeLabels[ev.data.type] ?? ev.data.type,
-    },
-  };
-
-  /* Quick-nav buttons */
-  const quickNav = [
-    {
-      label: "Medicamentos",
-      icon: Pill,
-      bg: "bg-pink-100",
-      fg: "text-pink-700",
-      action: onNavigateToMedications,
-    },
-    {
-      label: "Agenda",
-      icon: Calendar,
-      bg: "bg-blue-100",
-      fg: "text-blue-700",
-      action: onNavigateToCalendar,
-    },
-    {
-      label: "Ejercicios",
-      icon: Dumbbell,
-      bg: "bg-green-100",
-      fg: "text-green-700",
-      action: onNavigateToExercises,
-    },
-  ];
-
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-4">
-      {/* Quick access */}
-      <div className="grid grid-cols-3 gap-3 px-5 pt-6 pb-2">
-        {quickNav.map(({ label, icon: Icon, bg, fg, action }) => (
-          <button
-            key={label}
-            onClick={action}
-            className={`${bg} rounded-2xl flex flex-col items-center justify-center gap-1 py-4 active:scale-95 transition-transform`}
-          >
-            <Icon size={24} className={fg} />
-            <span className={`text-xs font-semibold ${fg}`}>{label}</span>
-          </button>
-        ))}
+    <>
+      <div className="flex flex-col h-full overflow-y-auto pb-4">
+        <QuickAccess
+          onNavigateToMedications={onNavigateToMedications}
+          onNavigateToCalendar={onNavigateToCalendar}
+          onNavigateToExercises={onNavigateToExercises}
+          onNavigateToCares={onNavigateToCares}
+        />
+        <DogFilterTabs
+          dogs={dogs}
+          selectedDogId={selectedDogId}
+          onSelect={setSelectedDogId}
+          totalCount={allEvents.length}
+          countByDog={countByDog}
+        />
+        <EventsList
+          events={filteredEvents}
+          completions={completions}
+          selectedDogId={selectedDogId}
+          dogs={dogs}
+          onToggle={handleToggle}
+        />
       </div>
 
-      {/* Events */}
-      <div className="px-5 pt-4">
-        <h2 className="text-gray-800 font-bold text-base mb-3">
-          {allEvents.length === 0
-            ? "Sin recordatorios para hoy"
-            : `${allEvents.length} recordatorio${allEvents.length !== 1 ? "s" : ""} hoy`}
-        </h2>
-
-        {allEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-            <CheckCircle2 size={64} strokeWidth={1.5} />
-            <p className="mt-4 text-sm text-center">¡Todo tranquilo por hoy!</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {allEvents.map((ev) => {
-              const cfg = typeConfig[ev.type];
-              const Icon = cfg.icon;
-              const key = getKey(ev);
-              const isDone = !!completions[key];
-
-              return (
-                <div
-                  key={ev.id}
-                  className={`bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3 ${isDone ? "opacity-50" : ""}`}
-                >
-                  <div
-                    className={`w-10 h-10 ${cfg.bg} rounded-xl flex items-center justify-center shrink-0`}
-                  >
-                    <Icon size={20} className={cfg.color} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={`font-semibold text-sm text-gray-900 truncate ${isDone ? "line-through" : ""}`}
-                    >
-                      {cfg.label(ev)}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {ev.dogName} · {ev.time}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleToggle(ev)}
-                    className="shrink-0 text-gray-400 active:scale-90 transition-transform"
-                  >
-                    {isDone ? (
-                      <CheckCircle2 size={24} className="text-green-500" />
-                    ) : (
-                      <Circle size={24} />
-                    )}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+      {confetti && (
+        <ConfettiEffect
+          originX={confetti.x}
+          originY={confetti.y}
+          onDone={() => setConfetti(null)}
+        />
+      )}
+    </>
   );
 }

@@ -8,6 +8,7 @@ import { DogsProvider } from "./context/DogsContext";
 import { CalendarProvider } from "./context/CalendarContext";
 import { MedicationProvider } from "./context/MedicationContext";
 import { ExerciseProvider } from "./context/ExerciseContext";
+import { CareProvider } from "./context/CareContext";
 import { MealTimesProvider } from "./context/MealTimesContext";
 import { SharedAccessProvider } from "./context/SharedAccessContext";
 
@@ -43,11 +44,13 @@ function AppContent() {
       <CalendarProvider>
         <MedicationProvider>
           <ExerciseProvider>
-            <MealTimesProvider>
-              <SharedAccessProvider>
-                <AppLayout />
-              </SharedAccessProvider>
-            </MealTimesProvider>
+            <CareProvider>
+              <MealTimesProvider>
+                <SharedAccessProvider>
+                  <AppLayout />
+                </SharedAccessProvider>
+              </MealTimesProvider>
+            </CareProvider>
           </ExerciseProvider>
         </MedicationProvider>
       </CalendarProvider>

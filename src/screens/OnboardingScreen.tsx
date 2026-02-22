@@ -129,7 +129,7 @@ export default function OnboardingScreen({ onContinue }: Props) {
           >
             {/* Thumb */}
             <div
-              className="absolute left-[5px] w-[50px] h-[50px] rounded-full bg-white flex items-center justify-center cursor-grab active:cursor-grabbing"
+              className="absolute left-1.25 w-12.5 h-12.5 rounded-full bg-white flex items-center justify-center cursor-grab active:cursor-grabbing"
               style={{
                 zIndex: 2,
                 transform: `translateX(${slideX}px)`,

@@ -3,6 +3,7 @@ import { ArrowLeft, Clock, Utensils } from "lucide-react";
 import { useMedication } from "../context/MedicationContext";
 import { useMealTimes } from "../context/MealTimesContext";
 import { useDogs } from "../context/DogsContext";
+import { formatLocalDate, parseLocalDate } from "../utils/supabase";
 import type { ScheduleType, NotificationTime } from "../types";
 
 interface AddEditMedicationScreenProps {
@@ -10,8 +11,11 @@ interface AddEditMedicationScreenProps {
   onNavigateBack: () => void;
 }
 
-/** Calcula tiempos cada N horas desde startTime */
+/** Calcula tiempos cada N horas desde startTime.
+ * Si freqHours >= 24 (ej: 48h = cada 2 días) solo devuelve el horario de inicio,
+ * ya que el filtrado por día se hace en HomeScreen. */
 function calcTimesFromHours(startTime: string, freqHours: number): string[] {
+  if (freqHours >= 24) return [startTime];
   const [h, m] = startTime.split(":").map(Number);
   const times: string[] = [];
   let cur = h * 60 + m;
@@ -72,8 +76,8 @@ export default function AddEditMedicationScreen({
   );
   const [startDate, setStartDate] = useState(
     existing?.startDate
-      ? new Date(existing.startDate).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
+      ? formatLocalDate(new Date(existing.startDate))
+      : formatLocalDate(new Date()),
   );
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [notificationTime, setNotificationTime] = useState<NotificationTime>(
@@ -91,11 +95,11 @@ export default function AddEditMedicationScreen({
   useEffect(() => {
     const dur = parseInt(durationDays);
     if (!isNaN(dur) && dur >= 0) {
-      setEndDate(addDays(new Date(startDate), dur > 0 ? dur : 1));
+      setEndDate(addDays(parseLocalDate(startDate), dur > 0 ? dur : 1));
     }
     if (scheduleType === "hours") {
       const freq = parseInt(frequencyHours);
-      if (!isNaN(freq) && freq > 0 && freq <= 24)
+      if (!isNaN(freq) && freq > 0)
         setScheduledTimes(calcTimesFromHours(startTime, freq));
     } else {
       const times = mealTimes
@@ -164,7 +168,7 @@ export default function AddEditMedicationScreen({
         mealIds: scheduleType === "meals" ? selectedMealIds : [],
         scheduledTimes,
         durationDays: dur,
-        startDate: new Date(startDate),
+        startDate: parseLocalDate(startDate),
         endDate,
         notes: notes.trim(),
         notificationTime,

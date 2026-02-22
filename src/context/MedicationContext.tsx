@@ -7,7 +7,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import type { Medication, Completion } from "../types";
-import { supabase, formatLocalDate } from "../utils/supabase";
+import { supabase, formatLocalDate, parseLocalDate } from "../utils/supabase";
 import { useAuth } from "./AuthContext";
 
 interface MedicationContextType {
@@ -43,9 +43,9 @@ function mapMedication(row: any): Medication {
     startTime: row.start_time ?? undefined,
     mealIds: row.meal_ids ?? undefined,
     durationDays: row.duration_days,
-    startDate: new Date(row.start_date),
+    startDate: parseLocalDate(row.start_date),
     scheduledTimes: row.times ?? [],
-    endDate: new Date(row.end_date),
+    endDate: parseLocalDate(row.end_date),
     notes: row.notes ?? undefined,
     isActive: row.is_active ?? true,
     notificationTime: row.notification_time ?? "none",
@@ -113,6 +113,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
   };
 
   const updateMedication = async (id: string, m: Omit<Medication, "id">) => {
+    if (!user) return;
     const { error } = await supabase
       .from("medications")
       .update({
@@ -130,7 +131,8 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
         is_active: m.isActive,
         notification_time: m.notificationTime,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id);
     if (error) throw error;
     await loadMedications();
   };

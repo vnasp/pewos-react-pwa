@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Dog } from "../types";
-import { supabase } from "../utils/supabase";
+import { supabase, parseLocalDate } from "../utils/supabase";
 import { useAuth } from "./AuthContext";
 
 interface DogsContextType {
@@ -21,7 +21,7 @@ function mapDog(row: any): Dog {
     name: row.name,
     photo: row.photo_uri ?? undefined,
     breed: row.breed ?? "",
-    birthDate: new Date(row.birth_date),
+    birthDate: parseLocalDate(row.birth_date),
     gender: row.gender,
     isNeutered: row.neutered ?? false,
   };

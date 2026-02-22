@@ -26,6 +26,14 @@ export type ExerciseType =
   | "entrenamiento"
   | "otro";
 
+export type CareType =
+  | "limpieza_herida"
+  | "frio"
+  | "calor"
+  | "infrarrojo"
+  | "laser"
+  | "otro";
+
 export type ScheduleType = "hours" | "meals";
 
 export type NotificationTime =
@@ -103,6 +111,26 @@ export interface Exercise {
   notificationIds: string[];
 }
 
+export interface Care {
+  id: string;
+  dogId: string;
+  dogName: string;
+  type: CareType;
+  customTypeDescription?: string;
+  durationMinutes: number;
+  timesPerDay: number;
+  startTime: string;
+  endTime: string;
+  scheduledTimes: string[];
+  startDate: Date;
+  isPermanent: boolean;
+  durationDays?: number;
+  endDate?: Date;
+  notes?: string;
+  isActive: boolean;
+  notificationTime: NotificationTime;
+}
+
 export interface MealTime {
   id: string;
   userId: string;
@@ -114,7 +142,7 @@ export interface MealTime {
 export interface Completion {
   id: string;
   userId: string;
-  itemType: "medication" | "exercise" | "appointment";
+  itemType: "medication" | "exercise" | "appointment" | "care";
   itemId: string;
   scheduledTime?: string;
   completedDate: string;

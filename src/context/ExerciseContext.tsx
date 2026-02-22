@@ -7,7 +7,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import type { Exercise, Completion } from "../types";
-import { supabase, formatLocalDate } from "../utils/supabase";
+import { supabase, formatLocalDate, parseLocalDate } from "../utils/supabase";
 import { useAuth } from "./AuthContext";
 
 export const exerciseTypeLabels: Record<string, string> = {
@@ -81,10 +81,10 @@ function mapExercise(row: any): Exercise {
     startTime: row.start_time,
     endTime: row.end_time,
     scheduledTimes: row.scheduled_times ?? [],
-    startDate: new Date(row.start_date),
+    startDate: parseLocalDate(row.start_date),
     isPermanent: row.is_permanent ?? true,
     durationWeeks: row.duration_weeks ?? undefined,
-    endDate: row.end_date ? new Date(row.end_date) : undefined,
+    endDate: row.end_date ? parseLocalDate(row.end_date) : undefined,
     notes: row.notes ?? undefined,
     isActive: row.is_active ?? true,
     notificationTime: row.notification_time ?? "none",
@@ -153,6 +153,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
   };
 
   const updateExercise = async (id: string, e: Omit<Exercise, "id">) => {
+    if (!user) return;
     const { error } = await supabase
       .from("exercises")
       .update({
@@ -171,7 +172,8 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
         is_active: e.isActive,
         notification_time: e.notificationTime,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id);
     if (error) throw error;
     await loadExercises();
   };

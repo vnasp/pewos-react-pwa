@@ -1,26 +1,26 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import {
-  useExercise,
-  exerciseTypeLabels,
-  exerciseTypeColors,
-  calculateScheduledTimes,
-} from "../context/ExerciseContext";
+  useCare,
+  careTypeLabels,
+  careTypeColors,
+} from "../context/CareContext";
+import { calculateScheduledTimes } from "../context/ExerciseContext";
 import { useDogs } from "../context/DogsContext";
 import { formatLocalDate, parseLocalDate } from "../utils/supabase";
-import type { ExerciseType, NotificationTime } from "../types";
+import type { CareType, NotificationTime } from "../types";
 
-interface AddEditExerciseScreenProps {
-  exerciseId?: string;
+interface AddEditCareScreenProps {
+  careId?: string;
   onNavigateBack: () => void;
 }
 
-const exerciseTypes: ExerciseType[] = [
-  "caminata",
-  "cavaletti",
-  "balanceo",
-  "slalom",
-  "entrenamiento",
+const careTypes: CareType[] = [
+  "limpieza_herida",
+  "frio",
+  "calor",
+  "infrarrojo",
+  "laser",
   "otro",
 ];
 
@@ -33,38 +33,42 @@ const notificationOptions: { value: NotificationTime; label: string }[] = [
   { value: "1day", label: "1 día antes" },
 ];
 
-export default function AddEditExerciseScreen({
-  exerciseId,
+export default function AddEditCareScreen({
+  careId,
   onNavigateBack,
-}: AddEditExerciseScreenProps) {
-  const { addExercise, updateExercise, getExerciseById } = useExercise();
+}: AddEditCareScreenProps) {
+  const { addCare, updateCare, getCareById } = useCare();
   const { dogs } = useDogs();
-  const isEditing = !!exerciseId;
-  const existing = exerciseId ? getExerciseById(exerciseId) : undefined;
+  const isEditing = !!careId;
+  const existing = careId ? getCareById(careId) : undefined;
 
   const [selectedDogId, setSelectedDogId] = useState(
     existing?.dogId ?? dogs[0]?.id ?? "",
   );
-  const [type, setType] = useState<ExerciseType>(existing?.type ?? "caminata");
+  const [type, setType] = useState<CareType>(
+    existing?.type ?? "limpieza_herida",
+  );
   const [customTypeDescription, setCustomTypeDescription] = useState(
     existing?.customTypeDescription ?? "",
   );
   const [durationMinutes, setDurationMinutes] = useState(
-    existing?.durationMinutes?.toString() ?? "30",
+    existing?.durationMinutes?.toString() ?? "15",
   );
   const [timesPerDay, setTimesPerDay] = useState(
     existing?.timesPerDay?.toString() ?? "1",
   );
-  const [startTime, setStartTime] = useState(existing?.startTime ?? "07:00");
+  const [startTime, setStartTime] = useState(existing?.startTime ?? "08:00");
   const [endTime, setEndTime] = useState(existing?.endTime ?? "21:00");
   const [startDate, setStartDate] = useState(
     existing?.startDate
       ? formatLocalDate(new Date(existing.startDate))
       : formatLocalDate(new Date()),
   );
-  const [isPermanent, setIsPermanent] = useState(existing?.isPermanent ?? true);
-  const [durationWeeks, setDurationWeeks] = useState(
-    existing?.durationWeeks?.toString() ?? "4",
+  const [isPermanent, setIsPermanent] = useState(
+    existing?.isPermanent ?? false,
+  );
+  const [durationDays, setDurationDays] = useState(
+    existing?.durationDays?.toString() ?? "14",
   );
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [notificationTime, setNotificationTime] = useState<NotificationTime>(
@@ -89,7 +93,7 @@ export default function AddEditExerciseScreen({
       return;
     }
     if (type === "otro" && !customTypeDescription.trim()) {
-      setError("Especifica el tipo de ejercicio");
+      setError("Describe el tipo de cuidado");
       return;
     }
     const dur = parseInt(durationMinutes);
@@ -102,9 +106,9 @@ export default function AddEditExerciseScreen({
       setError("Frecuencia inválida");
       return;
     }
-    const weeks = parseInt(durationWeeks);
-    if (!isPermanent && (isNaN(weeks) || weeks <= 0)) {
-      setError("Duración en semanas inválida");
+    const days = parseInt(durationDays);
+    if (!isPermanent && (isNaN(days) || days <= 0)) {
+      setError("Duración en días inválida");
       return;
     }
     setError(null);
@@ -114,7 +118,7 @@ export default function AddEditExerciseScreen({
       let endDate: Date | undefined;
       if (!isPermanent) {
         endDate = parseLocalDate(startDate);
-        endDate.setDate(endDate.getDate() + weeks * 7 - 1);
+        endDate.setDate(endDate.getDate() + days - 1);
       }
       const data = {
         dogId: selectedDogId,
@@ -129,15 +133,14 @@ export default function AddEditExerciseScreen({
         scheduledTimes,
         startDate: parseLocalDate(startDate),
         isPermanent,
-        durationWeeks: isPermanent ? undefined : weeks,
+        durationDays: isPermanent ? undefined : days,
         endDate,
         notes: notes.trim(),
         isActive: existing?.isActive ?? true,
         notificationTime,
-        notificationIds: existing?.notificationIds ?? [],
       };
-      if (isEditing && exerciseId) await updateExercise(exerciseId, data);
-      else await addExercise(data);
+      if (isEditing && careId) await updateCare(careId, data);
+      else await addCare(data);
       onNavigateBack();
     } catch {
       setError("No se pudo guardar");
@@ -156,7 +159,7 @@ export default function AddEditExerciseScreen({
           <ArrowLeft size={18} className="text-gray-800" />
         </button>
         <h2 className="text-gray-900 font-bold text-lg">
-          {isEditing ? "Editar rutina" : "Nueva rutina"}
+          {isEditing ? "Editar cuidado" : "Nuevo cuidado"}
         </h2>
       </div>
 
@@ -179,19 +182,19 @@ export default function AddEditExerciseScreen({
           </div>
         </div>
 
-        {/* Tipo de ejercicio */}
+        {/* Tipo de cuidado */}
         <div>
           <label className="text-gray-700 font-semibold text-sm block mb-2">
-            Tipo de ejercicio
+            Tipo de cuidado
           </label>
           <div className="grid grid-cols-2 gap-2">
-            {exerciseTypes.map((t) => (
+            {careTypes.map((t) => (
               <button
                 key={t}
                 onClick={() => setType(t)}
-                className={`py-2.5 rounded-xl font-semibold text-sm transition-colors text-center ${type === t ? "bg-indigo-600 text-white" : `${exerciseTypeColors[t] ?? "bg-gray-100"} text-gray-800`}`}
+                className={`py-2.5 rounded-xl font-semibold text-sm transition-colors text-center ${type === t ? "bg-indigo-600 text-white" : `${careTypeColors[t] ?? "bg-gray-100"} text-gray-800`}`}
               >
-                {exerciseTypeLabels[t]}
+                {careTypeLabels[t]}
               </button>
             ))}
           </div>
@@ -199,7 +202,7 @@ export default function AddEditExerciseScreen({
             <input
               value={customTypeDescription}
               onChange={(e) => setCustomTypeDescription(e.target.value)}
-              placeholder="Describe el tipo de ejercicio"
+              placeholder="Describe el tipo de cuidado"
               className="mt-2 w-full border border-gray-300 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400"
             />
           )}
@@ -262,13 +265,11 @@ export default function AddEditExerciseScreen({
 
         {/* Horarios calculados */}
         {scheduledTimes.length > 0 && (
-          <div className="bg-green-50 rounded-xl p-3">
-            <p className="text-green-700 font-semibold text-xs mb-1">
+          <div className="bg-rose-50 rounded-xl p-3">
+            <p className="text-rose-700 font-semibold text-xs mb-1">
               Horarios calculados
             </p>
-            <p className="text-green-900 text-sm">
-              {scheduledTimes.join(", ")}
-            </p>
+            <p className="text-rose-900 text-sm">{scheduledTimes.join(", ")}</p>
           </div>
         )}
 
@@ -285,45 +286,45 @@ export default function AddEditExerciseScreen({
           />
         </div>
 
-        {/* Duración / permanente */}
+        {/* Duración */}
         <div>
           <label className="text-gray-700 font-semibold text-sm block mb-2">
             Duración
           </label>
           <div className="flex gap-2">
             <button
-              onClick={() => setIsPermanent(true)}
-              className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-colors ${isPermanent ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-700"}`}
-            >
-              Permanente
-            </button>
-            <button
               onClick={() => setIsPermanent(false)}
               className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-colors ${!isPermanent ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-700"}`}
             >
-              Por semanas
+              Por días
+            </button>
+            <button
+              onClick={() => setIsPermanent(true)}
+              className={`flex-1 py-2.5 rounded-xl font-semibold text-sm transition-colors ${isPermanent ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-700"}`}
+            >
+              Sin fin
             </button>
           </div>
           {!isPermanent && (
             <div className="mt-2">
               <label className="text-gray-600 text-xs font-semibold block mb-1">
-                Número de semanas
+                Número de días
               </label>
               <div className="flex gap-2 mb-2">
-                {[1, 2, 4, 8].map((w) => (
+                {[7, 10, 14, 21].map((d) => (
                   <button
-                    key={w}
-                    onClick={() => setDurationWeeks(w.toString())}
-                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${durationWeeks === w.toString() ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-700"}`}
+                    key={d}
+                    onClick={() => setDurationDays(d.toString())}
+                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${durationDays === d.toString() ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-700"}`}
                   >
-                    {w}s
+                    {d}d
                   </button>
                 ))}
               </div>
               <input
                 type="number"
-                value={durationWeeks}
-                onChange={(e) => setDurationWeeks(e.target.value)}
+                value={durationDays}
+                onChange={(e) => setDurationDays(e.target.value)}
                 min={1}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400"
               />
@@ -379,7 +380,7 @@ export default function AddEditExerciseScreen({
             ? "Guardando..."
             : isEditing
               ? "Guardar cambios"
-              : "Agregar rutina"}
+              : "Agregar cuidado"}
         </button>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { formatLocalDate, parseLocalDate } from "../utils/supabase";
 import {
   useCalendar,
   appointmentTypeLabels,
@@ -59,8 +60,8 @@ export default function AddEditAppointmentScreen({
   );
   const [date, setDate] = useState(
     existing?.date
-      ? new Date(existing.date).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
+      ? formatLocalDate(new Date(existing.date))
+      : formatLocalDate(new Date()),
   );
   const [time, setTime] = useState(existing?.time ?? "09:00");
   const [type, setType] = useState<AppointmentType>(
@@ -78,7 +79,7 @@ export default function AddEditAppointmentScreen({
   );
   const [recurrenceEndDate, setRecurrenceEndDate] = useState(
     existing?.recurrenceEndDate
-      ? new Date(existing.recurrenceEndDate).toISOString().split("T")[0]
+      ? formatLocalDate(new Date(existing.recurrenceEndDate))
       : "",
   );
   const [saving, setSaving] = useState(false);
@@ -104,7 +105,7 @@ export default function AddEditAppointmentScreen({
       const data = {
         dogId: selectedDogId,
         dogName: selectedDog.name,
-        date: new Date(date),
+        date: parseLocalDate(date),
         time,
         type,
         customTypeDescription:
@@ -114,7 +115,7 @@ export default function AddEditAppointmentScreen({
         recurrencePattern,
         recurrenceEndDate:
           recurrencePattern !== "none" && recurrenceEndDate
-            ? new Date(recurrenceEndDate)
+            ? parseLocalDate(recurrenceEndDate)
             : undefined,
       };
       if (isEditing && appointmentId)

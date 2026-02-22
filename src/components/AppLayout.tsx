@@ -12,6 +12,8 @@ import MedicationsListScreen from "../screens/MedicationsListScreen";
 import AddEditMedicationScreen from "../screens/AddEditMedicationScreen";
 import ExercisesListScreen from "../screens/ExercisesListScreen";
 import AddEditExerciseScreen from "../screens/AddEditExerciseScreen";
+import CaresListScreen from "../screens/CaresListScreen";
+import AddEditCareScreen from "../screens/AddEditCareScreen";
 import MealTimesSettingsScreen from "../screens/MealTimesSettingsScreen";
 import SharedAccessScreen from "../screens/SharedAccessScreen";
 import SettingsScreen from "../screens/SettingsScreen";
@@ -24,15 +26,17 @@ type SubScreen =
   | { kind: "addEditAppointment"; appointmentId?: string }
   | { kind: "addEditMedication"; medicationId?: string }
   | { kind: "addEditExercise"; exerciseId?: string }
+  | { kind: "addEditCare"; careId?: string }
   | { kind: "mealTimes" }
   | { kind: "sharedAccess" }
   | { kind: "medications" }
-  | { kind: "exercises" };
+  | { kind: "exercises" }
+  | { kind: "cares" };
 
 const screenTitles: Record<Tab, { title1: string; title2: string }> = {
   home: { title1: "Recordatorios", title2: "de Hoy" },
   pets: { title1: "Mis", title2: "Mascotas" },
-  appointments: { title1: "Mi", title2: "Agenda" },
+  appointments: { title1: "Agenda", title2: "Mascotas" },
   settings: { title1: "Mis", title2: "Ajustes" },
 };
 
@@ -43,10 +47,12 @@ const subScreenTitles: Partial<
   addEditAppointment: { title1: "Nueva", title2: "Cita" },
   addEditMedication: { title1: "Medica-", title2: "mento" },
   addEditExercise: { title1: "Rutina de", title2: "Ejercicio" },
+  addEditCare: { title1: "Cuidado", title2: "Operatorios" },
   mealTimes: { title1: "Horarios de", title2: "Comida" },
   sharedAccess: { title1: "Acceso", title2: "Compartido" },
   medications: { title1: "Medica-", title2: "mentos" },
   exercises: { title1: "Rutinas de", title2: "Ejercicio" },
+  cares: { title1: "Cuidados", title2: "Operatorios" },
 };
 
 export default function AppLayout() {
@@ -72,7 +78,9 @@ export default function AppLayout() {
   const showAddForTab =
     !isSubScreen && (currentTab === "pets" || currentTab === "appointments");
   const showAddForSub =
-    subScreen.kind === "medications" || subScreen.kind === "exercises";
+    subScreen.kind === "medications" ||
+    subScreen.kind === "exercises" ||
+    subScreen.kind === "cares";
 
   const handleAdd = () => {
     if (currentTab === "pets") setSubScreen({ kind: "addEditDog" });
@@ -84,6 +92,7 @@ export default function AppLayout() {
       setSubScreen({ kind: "addEditMedication" });
     else if (subScreen.kind === "exercises")
       setSubScreen({ kind: "addEditExercise" });
+    else if (subScreen.kind === "cares") setSubScreen({ kind: "addEditCare" });
   };
 
   const renderContent = () => {
@@ -116,6 +125,13 @@ export default function AppLayout() {
             onNavigateBack={handleBack}
           />
         );
+      case "addEditCare":
+        return (
+          <AddEditCareScreen
+            careId={subScreen.careId}
+            onNavigateBack={handleBack}
+          />
+        );
       case "mealTimes":
         return <MealTimesSettingsScreen />;
       case "sharedAccess":
@@ -136,6 +152,14 @@ export default function AppLayout() {
             }
           />
         );
+      case "cares":
+        return (
+          <CaresListScreen
+            onNavigateToAddEdit={(id) =>
+              setSubScreen({ kind: "addEditCare", careId: id })
+            }
+          />
+        );
     }
 
     switch (currentTab) {
@@ -150,6 +174,7 @@ export default function AppLayout() {
               setCurrentTab("appointments");
             }}
             onNavigateToExercises={() => setSubScreen({ kind: "exercises" })}
+            onNavigateToCares={() => setSubScreen({ kind: "cares" })}
           />
         );
       case "pets":
@@ -180,6 +205,7 @@ export default function AppLayout() {
               setSubScreen({ kind: "medications" })
             }
             onNavigateToExercises={() => setSubScreen({ kind: "exercises" })}
+            onNavigateToCares={() => setSubScreen({ kind: "cares" })}
           />
         );
     }
@@ -193,7 +219,7 @@ export default function AppLayout() {
         showAddButton={showAddForTab || showAddForSub}
         onAddPress={showAddForSub ? handleAddSub : handleAdd}
       />
-      <main className="flex-1 bg-white rounded-t-[30px] -mt-[30px] overflow-y-auto relative z-10">
+      <main className="flex-1 bg-white rounded-t-[30px] -mt-7.5 overflow-y-auto relative z-10">
         {renderContent()}
       </main>
       <TabBar currentScreen={currentTab} onNavigate={handleTabNavigate} />

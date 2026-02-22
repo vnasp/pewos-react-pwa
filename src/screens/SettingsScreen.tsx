@@ -1,4 +1,4 @@
-import { LogOut, Users, Clock, Pill, Dumbbell } from "lucide-react";
+import { LogOut, Users, Clock, Pill, Dumbbell, HeartPulse } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 interface SettingsScreenProps {
@@ -6,6 +6,7 @@ interface SettingsScreenProps {
   onNavigateToSharedAccess: () => void;
   onNavigateToMedications: () => void;
   onNavigateToExercises: () => void;
+  onNavigateToCares: () => void;
 }
 
 export default function SettingsScreen({
@@ -13,6 +14,7 @@ export default function SettingsScreen({
   onNavigateToSharedAccess,
   onNavigateToMedications,
   onNavigateToExercises,
+  onNavigateToCares,
 }: SettingsScreenProps) {
   const { user, signOut } = useAuth();
 
@@ -37,6 +39,13 @@ export default function SettingsScreen({
           action: onNavigateToExercises,
           color: "bg-green-100",
           fg: "text-green-600",
+        },
+        {
+          label: "Cuidados post-operatorios",
+          icon: HeartPulse,
+          action: onNavigateToCares,
+          color: "bg-rose-100",
+          fg: "text-rose-600",
         },
         {
           label: "Horarios de comida",

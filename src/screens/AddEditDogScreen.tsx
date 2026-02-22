@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { ArrowLeft, Camera } from "lucide-react";
 import { useDogs } from "../context/DogsContext";
+import { formatLocalDate, parseLocalDate } from "../utils/supabase";
 
 interface AddEditDogScreenProps {
   dogId?: string;
@@ -20,8 +21,8 @@ export default function AddEditDogScreen({
   const [breed, setBreed] = useState(existing?.breed ?? "");
   const [birthDate, setBirthDate] = useState(
     existing?.birthDate
-      ? new Date(existing.birthDate).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
+      ? formatLocalDate(new Date(existing.birthDate))
+      : formatLocalDate(new Date()),
   );
   const [gender, setGender] = useState<"male" | "female">(
     existing?.gender ?? "male",
@@ -55,7 +56,7 @@ export default function AddEditDogScreen({
         name: name.trim(),
         photo,
         breed: breed.trim(),
-        birthDate: new Date(birthDate),
+        birthDate: parseLocalDate(birthDate),
         gender,
         isNeutered,
       };

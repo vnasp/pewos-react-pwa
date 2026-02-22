@@ -6,7 +6,7 @@
 }
 
 @theme inline {
-  --font-sans: "Roboto Condensed", sans-serif;
+  --font-sans: "Montserrat", sans-serif;
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -39,6 +39,7 @@
 
 body {
   @apply bg-background text-foreground font-sans;
+  font-weight: 500;
 }
 
 @keyframes float-up {
@@ -101,4 +102,71 @@ body {
 
 .animate-pulse-ring-slow {
   animation: pulse-ring-slow 5s linear infinite;
+}
+
+/* ConfettiEffect */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--cy)) translateX(var(--cx)) rotate(var(--cr));
+    opacity: 0;
+  }
+}
+
+@keyframes success-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes success-check {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.confetti-piece {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 2px;
+  animation: confetti-fall var(--cd) cubic-bezier(0.23, 1, 0.32, 1) var(--delay)
+    forwards;
+}
+
+.success-ring {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: success-ring 0.7s ease-out forwards;
+}
+
+.success-check {
+  position: fixed;
+  pointer-events: none;
+  animation: success-check 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Scrollbar helper */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

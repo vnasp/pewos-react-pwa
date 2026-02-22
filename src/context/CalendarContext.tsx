@@ -7,7 +7,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import type { Appointment, Completion } from "../types";
-import { supabase, formatLocalDate } from "../utils/supabase";
+import { supabase, formatLocalDate, parseLocalDate } from "../utils/supabase";
 import { useAuth } from "./AuthContext";
 
 export const appointmentTypeLabels: Record<string, string> = {
@@ -66,7 +66,7 @@ function mapAppointment(row: any): Appointment {
     id: row.id,
     dogId: row.dog_id,
     dogName: row.dog_name ?? "",
-    date: new Date(row.date),
+    date: parseLocalDate(row.date),
     time: row.time,
     type: row.type,
     customTypeDescription: row.custom_type_description ?? undefined,
@@ -74,7 +74,7 @@ function mapAppointment(row: any): Appointment {
     notificationTime: row.notification_time ?? "none",
     recurrencePattern: row.recurrence_pattern ?? undefined,
     recurrenceEndDate: row.recurrence_end_date
-      ? new Date(row.recurrence_end_date)
+      ? parseLocalDate(row.recurrence_end_date)
       : undefined,
     recurrenceParentId: row.recurrence_parent_id ?? undefined,
   };
@@ -140,6 +140,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
   };
 
   const updateAppointment = async (id: string, a: Omit<Appointment, "id">) => {
+    if (!user) return;
     const { error } = await supabase
       .from("appointments")
       .update({
@@ -156,7 +157,8 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
           ? formatLocalDate(a.recurrenceEndDate)
           : null,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id);
     if (error) throw error;
     await loadAppointments();
   };

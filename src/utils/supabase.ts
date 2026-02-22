@@ -12,3 +12,11 @@ export function formatLocalDate(date: Date): string {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
+
+/**
+ * Parsea "YYYY-MM-DD" como mediodía local para evitar el UTC-shift que
+ * convierte new Date("2026-02-23") en el día anterior en zonas GMT-X.
+ */
+export function parseLocalDate(dateStr: string): Date {
+  return new Date(`${dateStr}T12:00:00`);
+}
