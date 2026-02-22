@@ -162,7 +162,7 @@ COMMENT ON COLUMN meal_times.order_index IS 'Orden de la comida en el día (1, 2
 CREATE TABLE completions (
   id             UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id        UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  item_type      TEXT NOT NULL CHECK (item_type IN ('medication', 'exercise', 'appointment')),
+  item_type      TEXT NOT NULL CHECK (item_type IN ('medication', 'exercise', 'appointment', 'care')),
   item_id        UUID NOT NULL,
   scheduled_time TEXT,
   completed_date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -172,7 +172,7 @@ CREATE TABLE completions (
 );
 
 COMMENT ON TABLE  completions                IS 'Registra cuando los usuarios completan tareas (medicaciones, ejercicios, citas)';
-COMMENT ON COLUMN completions.item_type      IS 'Tipo de tarea: medication, exercise, o appointment';
+COMMENT ON COLUMN completions.item_type      IS 'Tipo de tarea: medication, exercise, appointment o care';
 COMMENT ON COLUMN completions.item_id        IS 'ID de la tarea completada';
 COMMENT ON COLUMN completions.scheduled_time IS 'Horario específico (HH:mm) para medicamentos y ejercicios que se dan múltiples veces al día';
 COMMENT ON COLUMN completions.completed_date IS 'Fecha en que se completó (permite múltiples completions por día si aplica)';

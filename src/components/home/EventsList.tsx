@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Calendar,
   Pill,
@@ -68,6 +68,48 @@ export default function EventsList({
   onToggle,
 }: EventsListProps) {
   const [showCompleted, setShowCompleted] = useState(false);
+  // Fase 1: ítems recién completados — visibles 600ms con estilo "done"
+  // Fase 2: colapsan con animación de altura/opacidad en 350ms
+  const [exitingKeys, setExitingKeys] = useState<Set<string>>(new Set());
+  const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(new Set());
+  const timers = useRef<Map<string, ReturnType<typeof setTimeout>[]>>(
+    new Map(),
+  );
+
+  useEffect(() => {
+    events.forEach((ev) => {
+      const key = getKey(ev);
+      if (completions[key] && !timers.current.has(key)) {
+        // Fase 1: mostrar como completado durante 600ms
+        setExitingKeys((prev) => new Set(prev).add(key));
+        const t1 = setTimeout(() => {
+          // Fase 2: colapsar (altura → 0 + opacidad → 0)
+          setCollapsedKeys((prev) => new Set(prev).add(key));
+          const t2 = setTimeout(() => {
+            // Eliminar de la lista
+            setExitingKeys((prev) => {
+              const n = new Set(prev);
+              n.delete(key);
+              return n;
+            });
+            setCollapsedKeys((prev) => {
+              const n = new Set(prev);
+              n.delete(key);
+              return n;
+            });
+            timers.current.delete(key);
+          }, 350);
+          timers.current.get(key)!.push(t2);
+        }, 600);
+        timers.current.set(key, [t1]);
+      }
+    });
+  }, [completions, events]);
+
+  useEffect(() => {
+    const all = timers.current;
+    return () => all.forEach((ts) => ts.forEach(clearTimeout));
+  }, []);
 
   const dogName = selectedDogId
     ? (dogs.find((d) => d.id === selectedDogId)?.name ?? "")
@@ -77,7 +119,9 @@ export default function EventsList({
   const pendingCount = events.length - doneCount;
   const visibleEvents = showCompleted
     ? events
-    : events.filter((ev) => !completions[getKey(ev)]);
+    : events.filter(
+        (ev) => !completions[getKey(ev)] || exitingKeys.has(getKey(ev)),
+      );
 
   const heading =
     events.length === 0
@@ -143,7 +187,13 @@ export default function EventsList({
             return (
               <div
                 key={ev.id}
-                className={`bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3 ${isDone ? "opacity-50" : ""}`}
+                className={`bg-white rounded-2xl shadow-sm flex items-center gap-3 overflow-hidden transition-all duration-300 ${
+                  collapsedKeys.has(key)
+                    ? "opacity-0 max-h-0 py-0 my-0 pointer-events-none"
+                    : exitingKeys.has(key)
+                      ? "opacity-60 max-h-32 p-4"
+                      : "max-h-32 p-4"
+                }`}
               >
                 <div
                   className={`w-10 h-10 ${cfg.bg} rounded-xl flex items-center justify-center shrink-0`}
