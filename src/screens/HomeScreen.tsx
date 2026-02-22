@@ -51,6 +51,7 @@ export default function HomeScreen({
   const [confetti, setConfetti] = useState<{ x: number; y: number } | null>(
     null,
   );
+  const [justCompletedKey, setJustCompletedKey] = useState<string | null>(null);
   const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
 
   const today = useMemo(() => {
@@ -295,7 +296,10 @@ export default function HomeScreen({
 
       // Solo lanzar confetti al MARCAR como completado (no al desmarcar)
       if (!wasCompleted) {
+        setJustCompletedKey(key);
         setConfetti({ x: clickX, y: clickY });
+      } else {
+        setJustCompletedKey(null);
       }
     },
     [
@@ -329,6 +333,7 @@ export default function HomeScreen({
         <EventsList
           events={filteredEvents}
           completions={completions}
+          justCompletedKey={justCompletedKey}
           selectedDogId={selectedDogId}
           dogs={dogs}
           onToggle={handleToggle}
@@ -339,7 +344,10 @@ export default function HomeScreen({
         <ConfettiEffect
           originX={confetti.x}
           originY={confetti.y}
-          onDone={() => setConfetti(null)}
+          onDone={() => {
+            setConfetti(null);
+            setJustCompletedKey(null);
+          }}
         />
       )}
     </>
