@@ -35,10 +35,12 @@ export default function LoginScreen() {
         <div className="flex flex-col items-center mb-12">
           <img
             src="/assets/icon.png"
-            alt="Pewos"
+            alt="Pewos Agenda"
             className="w-16 h-auto mb-4"
           />
-          <h1 className="text-white text-3xl font-bold tracking-wide">Pewos</h1>
+          <h1 className="text-white text-3xl font-bold tracking-wide">
+            Pewos Agenda
+          </h1>
           <p className="text-white/80 text-center mt-2">
             Gestiona la salud de tus mascotas
           </p>

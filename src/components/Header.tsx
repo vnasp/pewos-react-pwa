@@ -32,8 +32,8 @@ export default function Header({
         <div className="flex items-center gap-3">
           <img
             src="/assets/vet-icon.png"
-            alt="Pewos"
-            className="w-auto h-[29px] brightness-0 invert"
+            alt="Pewos Agenda"
+            className="w-auto h-7.25 brightness-0 invert"
           />
           {showAddButton && onAddPress && (
             <button

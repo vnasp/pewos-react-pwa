@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import { usePwaUpdate } from "./hooks/usePwaUpdate";
 import OnboardingScreen from "./screens/OnboardingScreen";
 import LoginScreen from "./screens/LoginScreen";
 import AppLayout from "./components/AppLayout";
@@ -14,12 +15,10 @@ import { SharedAccessProvider } from "./context/SharedAccessContext";
 
 function AppContent() {
   const { user, loading } = useAuth();
-  const [showOnboarding, setShowOnboarding] = useState(
-    !localStorage.getItem("onboarding_done"),
-  );
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  usePwaUpdate();
 
   const handleOnboardingContinue = () => {
-    localStorage.setItem("onboarding_done", "1");
     setShowOnboarding(false);
   };
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "./Header";
 import TabBar from "./TabBar";
+import InstallBanner from "./InstallBanner";
 
 // Screens
 import HomeScreen from "../screens/HomeScreen";
@@ -219,6 +220,7 @@ export default function AppLayout() {
         showAddButton={showAddForTab || showAddForSub}
         onAddPress={showAddForSub ? handleAddSub : handleAdd}
       />
+      <InstallBanner />
       <main className="flex-1 bg-white rounded-t-[30px] -mt-7.5 overflow-y-auto relative z-10">
         {renderContent()}
       </main>

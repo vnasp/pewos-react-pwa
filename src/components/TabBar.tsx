@@ -87,7 +87,7 @@ interface TabBarProps {
 export default function TabBar({ currentScreen, onNavigate }: TabBarProps) {
   return (
     <nav className="bg-indigo-600 border-t border-indigo-700 pb-safe">
-      <div className="flex pt-2.5 min-h-[64px]">
+      <div className="flex pt-2.5 min-h-16">
         {tabs.map((tab) => {
           const isActive = currentScreen === tab.id;
           return (

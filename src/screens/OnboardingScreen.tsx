@@ -49,71 +49,36 @@ export default function OnboardingScreen({ onContinue }: Props) {
   return (
     <div className="relative w-full h-screen overflow-hidden flex flex-col">
       {/* Gradient background */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: "linear-gradient(to bottom, #3730a3, #4f46e5, #f97316)",
-        }}
-      />
+      <div className="absolute inset-0 bg-linear-to-b from-indigo-800 to-indigo-600" />
 
       {/* Floating circle top-right */}
-      <div
-        className="absolute rounded-full bg-indigo-600 opacity-40 animate-float-up"
-        style={{ width: 300, height: 300, top: -150, right: -100 }}
-      />
+      <div className="absolute rounded-full bg-indigo-600 opacity-40 animate-float-up w-75 h-75 -top-37.5 -right-25" />
 
       {/* Floating circle bottom-left */}
-      <div
-        className="absolute rounded-full bg-indigo-700 opacity-40 animate-float-down"
-        style={{ width: 250, height: 250, bottom: -100, left: -50 }}
-      />
+      <div className="absolute rounded-full bg-indigo-700 opacity-40 animate-float-down w-62.5 h-62.5 -bottom-25 -left-12.5" />
 
       {/* Pulsing ring 1 */}
-      <div
-        className="absolute rounded-full animate-pulse-ring"
-        style={{
-          width: 400,
-          height: 400,
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          background: "rgba(99, 102, 241, 0.25)",
-          zIndex: 6,
-        }}
-      />
+      <div className="absolute rounded-full animate-pulse-ring w-100 h-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-500/25 z-6" />
 
       {/* Pulsing ring 2 */}
       <div
-        className="absolute rounded-full animate-pulse-ring-slow"
-        style={{
-          width: 400,
-          height: 400,
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          background: "rgba(99, 102, 241, 0.2)",
-          zIndex: 6,
-          animationDelay: "1.5s",
-        }}
+        className="absolute rounded-full animate-pulse-ring-slow w-100 h-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-500/20 z-6"
+        style={{ animationDelay: "1.5s" }}
       />
 
       {/* Background image */}
       <img
         src="/assets/onboarding.png"
         alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ zIndex: 5 }}
+        className="absolute inset-0 w-full h-full object-cover z-10"
         draggable={false}
       />
 
       {/* Content */}
-      <div
-        className="relative flex flex-col flex-1 px-5 pt-10"
-        style={{ zIndex: 10 }}
-      >
+      <div className="relative flex flex-col flex-1 px-5 pt-10 z-10">
         {/* Title */}
         <div className="flex-1 flex flex-col justify-start pt-28 text-center">
-          <h1 className="text-4xl font-semibold text-white leading-tight">
+          <h1 className="text-4xl font-medium text-white leading-tight">
             Todo la agenda de <br />
             <span className="font-black text-white">tu mascota</span>
             <br />
@@ -129,9 +94,8 @@ export default function OnboardingScreen({ onContinue }: Props) {
           >
             {/* Thumb */}
             <div
-              className="absolute left-1.25 w-12.5 h-12.5 rounded-full bg-white flex items-center justify-center cursor-grab active:cursor-grabbing"
+              className="absolute left-1.25 w-12.5 h-12.5 rounded-full bg-white flex items-center justify-center cursor-grab active:cursor-grabbing z-2"
               style={{
-                zIndex: 2,
                 transform: `translateX(${slideX}px)`,
                 transition: dragging.current ? "none" : "transform 0.3s ease",
               }}
