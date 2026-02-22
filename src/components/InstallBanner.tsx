@@ -1,15 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Share, PlusSquare, Download } from "lucide-react";
 
 type Platform = "ios-safari" | "chromium" | "other";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getPrompt = () => (window as any).__pwaPrompt ?? null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const clearPrompt = () => {
+  (window as any).__pwaPrompt = null;
+};
+
 function detectPlatform(): Platform {
   const ua = navigator.userAgent;
   const isIos = /iPhone|iPad|iPod/i.test(ua);
-  // Safari en iOS: no contiene "CriOS" ni "FxiOS" ni "EdgiOS"
   const isIosSafari = isIos && !/CriOS|FxiOS|EdgiOS/i.test(ua);
   if (isIosSafari) return "ios-safari";
-  // Chrome, Edge, Samsung, Opera — soportan beforeinstallprompt
   if (/Chrome|Edg|SamsungBrowser|OPR/i.test(ua)) return "chromium";
   return "other";
 }
@@ -23,94 +28,100 @@ function isStandalone(): boolean {
 }
 
 export default function InstallBanner() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const deferredPrompt = useRef<any>(null);
   const [visible, setVisible] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [platform, setPlatform] = useState<Platform>("other");
 
   useEffect(() => {
-    // No mostrar si ya está instalada
     if (isStandalone()) return;
-    // No mostrar si ya fue descartada en esta sesión
-    if (sessionStorage.getItem("install_banner_dismissed")) return;
+    if (localStorage.getItem("pwa_install_dismissed")) return;
 
     const p = detectPlatform();
     setPlatform(p);
 
     if (p === "chromium") {
-      const handler = (e: Event) => {
-        e.preventDefault();
-        deferredPrompt.current = e;
+      if (getPrompt()) {
         setVisible(true);
-      };
-      window.addEventListener("beforeinstallprompt", handler);
-      return () => window.removeEventListener("beforeinstallprompt", handler);
+      } else {
+        // Esperar el evento custom disparado desde main.tsx
+        const handler = () => setVisible(true);
+        window.addEventListener("pwa-prompt-ready", handler);
+        return () => window.removeEventListener("pwa-prompt-ready", handler);
+      }
     } else {
-      // iOS Safari y otros: mostrar instrucciones manuales
       setVisible(true);
     }
   }, []);
 
   const dismiss = () => {
-    sessionStorage.setItem("install_banner_dismissed", "1");
-    setVisible(false);
+    setClosing(true);
+    localStorage.setItem("pwa_install_dismissed", "1");
+    setTimeout(() => setVisible(false), 280);
   };
 
   const handleInstall = async () => {
-    if (!deferredPrompt.current) return;
-    deferredPrompt.current.prompt();
-    const { outcome } = await deferredPrompt.current.userChoice;
-    if (outcome === "accepted") {
-      setVisible(false);
-    }
-    deferredPrompt.current = null;
+    const prompt = getPrompt();
+    if (!prompt) return;
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    if (outcome === "accepted") dismiss();
+    clearPrompt();
   };
 
   if (!visible) return null;
 
   return (
-    <div className="bg-indigo-700 text-white px-4 py-3 flex items-start gap-3 text-sm">
-      <div className="flex-1">
-        {platform === "ios-safari" && (
-          <p className="leading-snug">
-            Instalá Pewos: toca{" "}
-            <span className="inline-flex items-center gap-0.5 font-semibold">
-              <Share size={14} className="inline" /> Compartir
-            </span>{" "}
-            y luego{" "}
-            <span className="inline-flex items-center gap-0.5 font-semibold">
-              <PlusSquare size={14} className="inline" /> Agregar a inicio
-            </span>
-            .
+    <div
+      className={`bg-indigo-700 text-white px-4 py-3 transition-all duration-300 ${
+        closing ? "-translate-y-2 opacity-0" : "translate-y-0 opacity-100"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        {/* Icono */}
+        <img
+          src="/pwa-192x192.png"
+          alt="Pewos"
+          className="w-10 h-10 rounded-xl shrink-0 object-cover"
+        />
+
+        {/* Texto */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold leading-tight">Pewos</p>
+          <p className="text-xs text-white/80 leading-snug mt-0.5">
+            {platform === "ios-safari" && (
+              <>
+                Toca <Share size={11} className="inline mx-0.5" />
+                <strong>Compartir</strong> y luego{" "}
+                <PlusSquare size={11} className="inline mx-0.5" />
+                <strong>Agregar a inicio</strong>
+              </>
+            )}
+            {platform === "chromium" && "Instalá la app para acceso rápido"}
+            {platform === "other" &&
+              "Agregá Pewos a tu pantalla de inicio desde el menú del navegador"}
           </p>
-        )}
+        </div>
+
+        {/* Botón instalar (solo chromium) */}
         {platform === "chromium" && (
-          <div className="flex items-center gap-2">
-            <p className="leading-snug flex-1">
-              Instalá Pewos como app para acceso rápido.
-            </p>
-            <button
-              onClick={handleInstall}
-              className="flex items-center gap-1.5 bg-white text-indigo-700 font-semibold text-xs px-3 py-1.5 rounded-full shrink-0"
-            >
-              <Download size={13} />
-              Instalar
-            </button>
-          </div>
+          <button
+            onClick={handleInstall}
+            className="flex items-center gap-1.5 bg-white text-indigo-700 font-semibold text-xs px-3 py-1.5 rounded-full shrink-0"
+          >
+            <Download size={13} />
+            Instalar
+          </button>
         )}
-        {platform === "other" && (
-          <p className="leading-snug">
-            Podés agregar Pewos a tu pantalla de inicio desde el menú del
-            navegador.
-          </p>
-        )}
+
+        {/* Cerrar */}
+        <button
+          onClick={dismiss}
+          className="shrink-0 opacity-60 hover:opacity-100 p-1"
+          aria-label="Cerrar"
+        >
+          <X size={16} />
+        </button>
       </div>
-      <button
-        onClick={dismiss}
-        className="shrink-0 opacity-70 hover:opacity-100 mt-0.5"
-      >
-        <X size={16} />
-      </button>
     </div>
   );
 }

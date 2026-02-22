@@ -1,45 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 
 interface Props {
   onContinue: () => void;
 }
 
 export default function OnboardingScreen({ onContinue }: Props) {
-  const [slideX, setSlideX] = useState(0);
-  const dragging = useRef(false);
-  const startX = useRef(0);
-  const sliderTrackRef = useRef<HTMLDivElement>(null);
-
-  // Max distance the thumb can travel (track width - thumb width - padding)
-  const maxSlide = () => {
-    if (!sliderTrackRef.current) return 240;
-    return sliderTrackRef.current.offsetWidth - 60 - 10; // track - thumb - padding
-  };
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    dragging.current = true;
-    startX.current = e.clientX - slideX;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging.current) return;
-    const newX = e.clientX - startX.current;
-    setSlideX(Math.max(0, Math.min(newX, maxSlide())));
-  };
-
-  const handlePointerUp = () => {
-    if (!dragging.current) return;
-    dragging.current = false;
-    if (slideX >= maxSlide() * 0.7) {
-      setSlideX(maxSlide());
-      setTimeout(onContinue, 300);
-    } else {
-      setSlideX(0);
-    }
-  };
-
-  // Prevent text selection while dragging
+  // Prevent text selection on the screen
   useEffect(() => {
     const prevent = (e: Event) => e.preventDefault();
     document.addEventListener("selectstart", prevent);
@@ -68,14 +34,15 @@ export default function OnboardingScreen({ onContinue }: Props) {
 
       {/* Background image */}
       <img
-        src="/assets/onboarding.png"
+        src="/assets/onboarding.webp"
         alt=""
         className="absolute inset-0 w-full h-full object-cover z-10"
+        fetchPriority="high"
         draggable={false}
       />
 
       {/* Content */}
-      <div className="relative flex flex-col flex-1 px-5 pt-10 z-10">
+      <div className="relative flex flex-col flex-1 px-5 pt-5 z-10">
         {/* Title */}
         <div className="flex-1 flex flex-col justify-start pt-28 text-center">
           <h1 className="text-4xl font-medium text-white leading-tight">
@@ -86,34 +53,14 @@ export default function OnboardingScreen({ onContinue }: Props) {
           </h1>
         </div>
 
-        {/* Slide-to-start button */}
+        {/* Button */}
         <div className="pb-10 px-5">
-          <div
-            ref={sliderTrackRef}
-            className="relative h-16 rounded-full flex items-center overflow-hidden select-none bg-[#f97316]"
+          <button
+            onClick={onContinue}
+            className="w-full h-16 rounded-full bg-[#f97316] text-white text-base font-semibold active:opacity-80 transition-opacity"
           >
-            {/* Thumb */}
-            <div
-              className="absolute left-1.25 w-12.5 h-12.5 rounded-full bg-white flex items-center justify-center cursor-grab active:cursor-grabbing z-2"
-              style={{
-                transform: `translateX(${slideX}px)`,
-                transition: dragging.current ? "none" : "transform 0.3s ease",
-              }}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-            >
-              <span className="text-2xl font-bold text-orange-500">→</span>
-            </div>
-
-            {/* Label */}
-            <span
-              className="w-full text-center text-base font-semibold text-white pointer-events-none"
-              style={{ opacity: 1 - slideX / (maxSlide() || 1) }}
-            >
-              Comenzar
-            </span>
-          </div>
+            Comenzar
+          </button>
         </div>
       </div>
     </div>

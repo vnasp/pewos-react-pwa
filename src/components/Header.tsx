@@ -31,9 +31,10 @@ export default function Header({
         {/* Derecha */}
         <div className="flex items-center gap-3">
           <img
-            src="/assets/vet-icon.png"
+            src="/assets/vet-icon.webp"
             alt="Pewos Agenda"
             className="w-auto h-7.25 brightness-0 invert"
+            fetchPriority="high"
           />
           {showAddButton && onAddPress && (
             <button

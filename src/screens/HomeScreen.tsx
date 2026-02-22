@@ -89,14 +89,16 @@ export default function HomeScreen({
     return medications
       .filter((m) => {
         if (!m.isActive) return false;
+        // No mostrar si la fecha de inicio es futura
+        const start = new Date(m.startDate);
+        start.setHours(0, 0, 0, 0);
+        if (start.getTime() > nowTs) return false;
         if (m.durationDays === 0) return true;
         const end = new Date(m.endDate);
         end.setHours(0, 0, 0, 0);
         if (end.getTime() < nowTs) return false;
         // Para medicamentos con intervalo > 24h verificar si hoy toca
         if (m.frequencyHours && m.frequencyHours > 24) {
-          const start = new Date(m.startDate);
-          start.setHours(0, 0, 0, 0);
           const daysSinceStart = Math.round(
             (nowTs - start.getTime()) / MS_PER_DAY,
           );
@@ -124,6 +126,10 @@ export default function HomeScreen({
     return exercises
       .filter((e) => {
         if (!e.isActive) return false;
+        // No mostrar si la fecha de inicio es futura
+        const start = new Date(e.startDate);
+        start.setHours(0, 0, 0, 0);
+        if (start.getTime() > now.getTime()) return false;
         if (e.isPermanent) return true;
         if (e.endDate) {
           const end = new Date(e.endDate);
@@ -151,6 +157,10 @@ export default function HomeScreen({
     return cares
       .filter((c) => {
         if (!c.isActive) return false;
+        // No mostrar si la fecha de inicio es futura
+        const start = new Date(c.startDate);
+        start.setHours(0, 0, 0, 0);
+        if (start.getTime() > now.getTime()) return false;
         if (c.isPermanent) return true;
         if (c.endDate) {
           const end = new Date(c.endDate);

@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./Header";
 import TabBar from "./TabBar";
 import InstallBanner from "./InstallBanner";
+import { useNotificationScheduler } from "../hooks/useNotificationScheduler";
+import { usePushSubscription } from "../hooks/usePushSubscription";
+import { requestNotificationPermission } from "../utils/notifications";
 
 // Screens
 import HomeScreen from "../screens/HomeScreen";
@@ -59,6 +62,13 @@ const subScreenTitles: Partial<
 export default function AppLayout() {
   const [currentTab, setCurrentTab] = useState<Tab>("home");
   const [subScreen, setSubScreen] = useState<SubScreen>({ kind: "none" });
+
+  // Pedir permiso de notificación al montar y programar notificaciones de hoy
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+  useNotificationScheduler();
+  usePushSubscription(); // Web Push (iOS Safari + Android background)
 
   const isSubScreen = subScreen.kind !== "none";
 
@@ -214,13 +224,13 @@ export default function AppLayout() {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
+      <InstallBanner />
       <Header
         title1={title1}
         title2={title2}
         showAddButton={showAddForTab || showAddForSub}
         onAddPress={showAddForSub ? handleAddSub : handleAdd}
       />
-      <InstallBanner />
       <main className="flex-1 bg-white rounded-t-[30px] -mt-7.5 overflow-y-auto relative z-10">
         {renderContent()}
       </main>

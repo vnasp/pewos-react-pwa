@@ -42,6 +42,10 @@ body {
   font-weight: 500;
 }
 
+button {
+  @apply cursor-pointer;
+}
+
 @keyframes float-up {
   0%,
   100% {

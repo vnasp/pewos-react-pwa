@@ -9,16 +9,15 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "apple-touch-icon.png"],
-      workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
-      },
       manifest: {
-        name: "Pewos",
+        name: "Pewos Agenda",
         short_name: "Pewos",
-        description: "Tu app de mascotas",
+        description: "La agenda para tus mascotas",
         theme_color: "#4f39f6",
         background_color: "#4f39f6",
         display: "standalone",

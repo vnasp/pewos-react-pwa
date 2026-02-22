@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import {
-  useCare,
-  careTypeLabels,
-  careTypeColors,
-} from "../context/CareContext";
+import { useCare, careTypeLabels } from "../context/CareContext";
 import { calculateScheduledTimes } from "../context/ExerciseContext";
 import { useDogs } from "../context/DogsContext";
 import { formatLocalDate, parseLocalDate } from "../utils/supabase";
@@ -192,7 +188,7 @@ export default function AddEditCareScreen({
               <button
                 key={t}
                 onClick={() => setType(t)}
-                className={`py-2.5 rounded-xl font-semibold text-sm transition-colors text-center ${type === t ? "bg-indigo-600 text-white" : `${careTypeColors[t] ?? "bg-gray-100"} text-gray-800`}`}
+                className={`py-2.5 rounded-xl font-semibold text-sm transition-colors text-center ${type === t ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-800"}`}
               >
                 {careTypeLabels[t]}
               </button>
@@ -317,7 +313,7 @@ export default function AddEditCareScreen({
                     onClick={() => setDurationDays(d.toString())}
                     className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${durationDays === d.toString() ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-700"}`}
                   >
-                    {d}d
+                    {d}
                   </button>
                 ))}
               </div>
