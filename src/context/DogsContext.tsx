@@ -47,27 +47,10 @@ export function DogsProvider({ children }: { children: ReactNode }) {
         setDogs([]);
         return;
       }
-
-      const { data: sharedAccess } = await supabase
-        .from("shared_access")
-        .select("owner_id")
-        .eq("shared_with_email", user.email)
-        .eq("status", "accepted");
-
-      const sharedOwnerIds = (sharedAccess ?? []).map((s: any) => s.owner_id);
-      let query = supabase.from("dogs").select("*");
-
-      if (sharedOwnerIds.length > 0) {
-        query = query.or(
-          `user_id.eq.${user.id},user_id.in.(${sharedOwnerIds.join(",")})`,
-        );
-      } else {
-        query = query.eq("user_id", user.id);
-      }
-
-      const { data, error } = await query.order("created_at", {
-        ascending: true,
-      });
+      const { data, error } = await supabase
+        .from("dogs")
+        .select("*")
+        .order("created_at", { ascending: true });
       if (error) throw error;
       setDogs((data ?? []).map(mapDog));
     } finally {

@@ -345,6 +345,7 @@ USING (
   )
 );
 CREATE POLICY "Users can create own completions" ON completions FOR INSERT WITH CHECK (user_id = auth.uid());
+CREATE POLICY "Users can update own completions" ON completions FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 CREATE POLICY "Users can delete own completions" ON completions FOR DELETE USING (user_id = auth.uid());
 
 
@@ -413,7 +414,15 @@ CREATE TABLE cares (
 
 ALTER TABLE cares ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users manage own cares"
-  ON cares
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can view own and shared cares"
+  ON cares FOR SELECT
+  USING (
+    auth.uid() = user_id
+    OR user_id IN (
+      SELECT owner_id FROM shared_access
+      WHERE shared_with_id = auth.uid() AND status = 'accepted'
+    )
+  );
+CREATE POLICY "Users can insert own cares"  ON cares FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own cares"  ON cares FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own cares"  ON cares FOR DELETE USING (auth.uid() = user_id);

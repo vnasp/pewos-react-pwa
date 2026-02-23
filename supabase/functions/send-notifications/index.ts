@@ -148,21 +148,49 @@ Deno.serve(async () => {
   }
 
   // ── Enviar Web Push para cada usuario ─────────────────────────────────
-  const userIds = [...pending.keys()];
-  if (userIds.length === 0) {
+  const ownerIds = [...pending.keys()];
+  if (ownerIds.length === 0) {
     return new Response(JSON.stringify({ sent: 0 }), { status: 200 });
   }
 
+  // Buscar usuarios compartidos que también deben recibir estas notificaciones
+  const { data: shares } = await supabase
+    .from("shared_access")
+    .select("owner_id,shared_with_id")
+    .in("owner_id", ownerIds)
+    .eq("status", "accepted")
+    .not("shared_with_id", "is", null);
+
+  // Construir mapa: userId → notificaciones (propias + de dueños compartidos)
+  const notificationsFor = new Map<string, { title: string; body: string }[]>();
+
+  // Notificaciones propias
+  for (const [userId, notifs] of pending.entries()) {
+    notificationsFor.set(userId, [
+      ...(notificationsFor.get(userId) ?? []),
+      ...notifs,
+    ]);
+  }
+
+  // Notificaciones hacia usuarios compartidos
+  for (const share of shares ?? []) {
+    const ownerNotifs = pending.get(share.owner_id) ?? [];
+    if (ownerNotifs.length === 0) continue;
+    const existing = notificationsFor.get(share.shared_with_id) ?? [];
+    notificationsFor.set(share.shared_with_id, [...existing, ...ownerNotifs]);
+  }
+
+  const allUserIds = [...notificationsFor.keys()];
   const { data: subs } = await supabase
     .from("push_subscriptions")
     .select("user_id,endpoint,p256dh,auth")
-    .in("user_id", userIds);
+    .in("user_id", allUserIds);
 
   let sent = 0;
   const errors: string[] = [];
 
   for (const sub of subs ?? []) {
-    const notifications = pending.get(sub.user_id) ?? [];
+    const notifications = notificationsFor.get(sub.user_id) ?? [];
     for (const n of notifications) {
       try {
         await webpush.sendNotification(

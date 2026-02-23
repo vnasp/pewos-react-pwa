@@ -104,7 +104,6 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from("appointments")
         .select("*, dogs(name)")
-        .eq("user_id", user.id)
         .order("date", { ascending: true });
 
       if (error) throw error;
