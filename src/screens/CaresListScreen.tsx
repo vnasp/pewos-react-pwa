@@ -7,7 +7,10 @@ import {
   Pencil,
   Trash2,
   Repeat,
+  Eye,
+  EyeOff,
 } from "lucide-react";
+import { useState } from "react";
 import {
   useCare,
   careTypeLabels,
@@ -25,18 +28,67 @@ export default function CaresListScreen({
 }: CaresListScreenProps) {
   const { cares, deleteCare, toggleCareActive } = useCare();
   const { dogs } = useDogs();
+  const [showFinished, setShowFinished] = useState(false);
 
   const handleDelete = (id: string, dogName: string) => {
     if (window.confirm(`¿Eliminar este cuidado de ${dogName}?`)) deleteCare(id);
   };
 
+  const finishedCount = cares.filter((c) => {
+    if (c.isPermanent) return false;
+    if (!c.endDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(c.endDate);
+    end.setHours(0, 0, 0, 0);
+    return end.getTime() < today.getTime();
+  }).length;
+
+  const visibleCares = showFinished
+    ? cares
+    : cares.filter((c) => {
+        if (c.isPermanent) return true;
+        if (!c.endDate) return true;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const end = new Date(c.endDate);
+        end.setHours(0, 0, 0, 0);
+        return end.getTime() >= today.getTime();
+      });
+
   const byDog = dogs.map((dog) => ({
     dog,
-    items: cares.filter((c) => c.dogId === dog.id),
+    items: visibleCares.filter((c) => c.dogId === dog.id),
   }));
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-6 px-5 pt-5">
+    <div className="flex flex-col h-full overflow-y-auto pb-6">
+      {finishedCount > 0 && (
+        <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+          <h2 className="text-gray-800 font-bold text-base">
+            {visibleCares.length} cuidado{visibleCares.length !== 1 ? "s" : ""}
+          </h2>
+          <button
+            onClick={() => setShowFinished((v) => !v)}
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {showFinished ? (
+              <>
+                <EyeOff size={14} />
+                <span>Ocultar finalizados</span>
+              </>
+            ) : (
+              <>
+                <Eye size={14} />
+                <span>
+                  {finishedCount} finalizado{finishedCount !== 1 ? "s" : ""}
+                </span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+      <div className="px-5 pt-5">
       {dogs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
           <Dog size={64} strokeWidth={1.5} />
@@ -176,6 +228,7 @@ export default function CaresListScreen({
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

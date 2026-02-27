@@ -10,7 +10,10 @@ import {
   Dog,
   Pencil,
   Trash2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
+import { useState } from "react";
 import { useMedication } from "../context/MedicationContext";
 import { useDogs } from "../context/DogsContext";
 
@@ -40,19 +43,60 @@ export default function MedicationsListScreen({
   const { medications, deleteMedication, toggleMedicationActive } =
     useMedication();
   const { dogs } = useDogs();
+  const [showFinished, setShowFinished] = useState(false);
 
   const handleDelete = (id: string, dogName: string, name: string) => {
     if (window.confirm(`¿Eliminar ${name} de ${dogName}?`))
       deleteMedication(id);
   };
 
+  const finishedCount = medications.filter((m) => {
+    const isContinuous = m.durationDays === 0;
+    const days = daysRemaining(m.endDate);
+    return !isContinuous && days < 0;
+  }).length;
+
+  const visibleMedications = showFinished
+    ? medications
+    : medications.filter((m) => {
+        const isContinuous = m.durationDays === 0;
+        const days = daysRemaining(m.endDate);
+        return isContinuous || days >= 0;
+      });
+
   const byDog = dogs.map((dog) => ({
     dog,
-    meds: medications.filter((m) => m.dogId === dog.id),
+    meds: visibleMedications.filter((m) => m.dogId === dog.id),
   }));
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-6 px-5 pt-5">
+    <div className="flex flex-col h-full overflow-y-auto pb-6">
+      {finishedCount > 0 && (
+        <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+          <h2 className="text-gray-800 font-bold text-base">
+            {visibleMedications.length} medicamento{visibleMedications.length !== 1 ? "s" : ""}
+          </h2>
+          <button
+            onClick={() => setShowFinished((v) => !v)}
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {showFinished ? (
+              <>
+                <EyeOff size={14} />
+                <span>Ocultar finalizados</span>
+              </>
+            ) : (
+              <>
+                <Eye size={14} />
+                <span>
+                  {finishedCount} finalizado{finishedCount !== 1 ? "s" : ""}
+                </span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+      <div className="px-5 pt-5">
       {dogs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
           <Dog size={64} strokeWidth={1.5} />
@@ -217,6 +261,7 @@ export default function MedicationsListScreen({
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

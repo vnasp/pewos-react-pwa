@@ -7,7 +7,10 @@ import {
   Dog,
   Pencil,
   Trash2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
+import { useState } from "react";
 import {
   useExercise,
   exerciseTypeLabels,
@@ -24,19 +27,68 @@ export default function ExercisesListScreen({
 }: ExercisesListScreenProps) {
   const { exercises, deleteExercise, toggleExerciseActive } = useExercise();
   const { dogs } = useDogs();
+  const [showFinished, setShowFinished] = useState(false);
 
   const handleDelete = (id: string, dogName: string) => {
     if (window.confirm(`¿Eliminar esta rutina de ${dogName}?`))
       deleteExercise(id);
   };
 
+  const finishedCount = exercises.filter((e) => {
+    if (e.isPermanent) return false;
+    if (!e.endDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(e.endDate);
+    end.setHours(0, 0, 0, 0);
+    return end.getTime() < today.getTime();
+  }).length;
+
+  const visibleExercises = showFinished
+    ? exercises
+    : exercises.filter((e) => {
+        if (e.isPermanent) return true;
+        if (!e.endDate) return true;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const end = new Date(e.endDate);
+        end.setHours(0, 0, 0, 0);
+        return end.getTime() >= today.getTime();
+      });
+
   const byDog = dogs.map((dog) => ({
     dog,
-    exs: exercises.filter((e) => e.dogId === dog.id),
+    exs: visibleExercises.filter((e) => e.dogId === dog.id),
   }));
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-6 px-5 pt-5">
+    <div className="flex flex-col h-full overflow-y-auto pb-6">
+      {finishedCount > 0 && (
+        <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+          <h2 className="text-gray-800 font-bold text-base">
+            {visibleExercises.length} rutina{visibleExercises.length !== 1 ? "s" : ""}
+          </h2>
+          <button
+            onClick={() => setShowFinished((v) => !v)}
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {showFinished ? (
+              <>
+                <EyeOff size={14} />
+                <span>Ocultar finalizados</span>
+              </>
+            ) : (
+              <>
+                <Eye size={14} />
+                <span>
+                  {finishedCount} finalizado{finishedCount !== 1 ? "s" : ""}
+                </span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+      <div className="px-5 pt-5">
       {dogs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
           <Dog size={64} strokeWidth={1.5} />
@@ -151,6 +203,7 @@ export default function ExercisesListScreen({
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }
