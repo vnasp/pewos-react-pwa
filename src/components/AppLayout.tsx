@@ -223,7 +223,7 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden">
+    <div className="flex flex-col h-svh w-full overflow-hidden">
       <InstallBanner />
       <Header
         title1={title1}

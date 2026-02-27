@@ -101,14 +101,33 @@ export default function CaresListScreen({
                               </span>
                             </div>
                           )}
-                          {!care.isPermanent && care.durationDays && (
-                            <div className="flex items-center gap-1 mb-1">
-                              <Timer size={13} className="text-amber-500" />
-                              <span className="text-amber-700 text-xs">
-                                {care.durationDays} días
-                              </span>
-                            </div>
-                          )}
+                          {!care.isPermanent &&
+                            care.durationDays &&
+                            care.endDate && (
+                              <div className="flex items-center gap-1 mb-1">
+                                <Timer size={13} className="text-amber-500" />
+                                <span className="text-amber-700 text-xs">
+                                  {(() => {
+                                    const today = new Date();
+                                    today.setHours(0, 0, 0, 0);
+                                    const end = new Date(care.endDate);
+                                    end.setHours(0, 0, 0, 0);
+                                    const diffTime =
+                                      end.getTime() - today.getTime();
+                                    const diffDays = Math.ceil(
+                                      diffTime / (1000 * 60 * 60 * 24),
+                                    );
+                                    if (diffDays < 0) {
+                                      return `Finalizado hace ${Math.abs(diffDays)} ${Math.abs(diffDays) === 1 ? "día" : "días"}`;
+                                    } else if (diffDays === 0) {
+                                      return "Finaliza hoy";
+                                    } else {
+                                      return `Finaliza en ${diffDays} ${diffDays === 1 ? "día" : "días"}`;
+                                    }
+                                  })()}
+                                </span>
+                              </div>
+                            )}
                           {care.notificationTime &&
                             care.notificationTime !== "none" && (
                               <div className="flex items-center gap-1">

@@ -132,6 +132,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase
       .from("cares")
       .update({
+        dog_id: c.dogId,
         type: c.type,
         custom_type_description: c.customTypeDescription ?? null,
         duration_minutes: c.durationMinutes,

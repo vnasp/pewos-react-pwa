@@ -51,7 +51,10 @@ export default function HomeScreen({
   const [confetti, setConfetti] = useState<{ x: number; y: number } | null>(
     null,
   );
-  const [justCompletedKey, setJustCompletedKey] = useState<string | null>(null);
+  const [justCompletedKeys, setJustCompletedKeys] = useState<Set<string>>(
+    new Set(),
+  );
+  const [isProcessing, setIsProcessing] = useState(false);
   const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
 
   const today = useMemo(() => {
@@ -258,6 +261,10 @@ export default function HomeScreen({
 
   const handleToggle = useCallback(
     async (ev: HomeEvent, clickX: number, clickY: number) => {
+      // Prevenir clicks múltiples simultáneos
+      if (isProcessing) return;
+      setIsProcessing(true);
+
       const key = (() => {
         if (ev.type === "appointment") return `appointment-${ev.data.id}`;
         if (ev.type === "medication")
@@ -296,13 +303,21 @@ export default function HomeScreen({
 
       // Solo lanzar confetti al MARCAR como completado (no al desmarcar)
       if (!wasCompleted) {
-        setJustCompletedKey(key);
+        setJustCompletedKeys((prev) => new Set(prev).add(key));
         setConfetti({ x: clickX, y: clickY });
       } else {
-        setJustCompletedKey(null);
+        setJustCompletedKeys((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
       }
+
+      setIsProcessing(false);
     },
     [
+      isProcessing,
+      completions,
       markAppointmentCompleted,
       markMedicationCompleted,
       markExerciseCompleted,
@@ -333,7 +348,7 @@ export default function HomeScreen({
         <EventsList
           events={filteredEvents}
           completions={completions}
-          justCompletedKey={justCompletedKey}
+          justCompletedKeys={justCompletedKeys}
           selectedDogId={selectedDogId}
           dogs={dogs}
           onToggle={handleToggle}
@@ -346,7 +361,10 @@ export default function HomeScreen({
           originY={confetti.y}
           onDone={() => {
             setConfetti(null);
-            setJustCompletedKey(null);
+            // No limpiar justCompletedKeys aquí - se limpiarán después de que desaparezcan de la vista
+            setTimeout(() => {
+              setJustCompletedKeys(new Set());
+            }, 300); // Dar tiempo para que la animación de opacidad se complete
           }}
         />
       )}

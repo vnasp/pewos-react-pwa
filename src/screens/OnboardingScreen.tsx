@@ -13,7 +13,7 @@ export default function OnboardingScreen({ onContinue }: Props) {
   }, []);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden flex flex-col">
+    <div className="relative w-full h-svh overflow-hidden flex flex-col">
       {/* Gradient background */}
       <div className="absolute inset-0 bg-linear-to-b from-indigo-800 to-indigo-600" />
 

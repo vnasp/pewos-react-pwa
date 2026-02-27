@@ -18,7 +18,7 @@ import type { HomeEvent } from "./types";
 interface EventsListProps {
   events: HomeEvent[];
   completions: Record<string, Completion | null>;
-  justCompletedKey?: string | null;
+  justCompletedKeys?: Set<string>;
   selectedDogId: string | null;
   dogs: Dog[];
   onToggle: (ev: HomeEvent, x: number, y: number) => void;
@@ -64,7 +64,7 @@ const typeConfig = {
 export default function EventsList({
   events,
   completions,
-  justCompletedKey,
+  justCompletedKeys,
   selectedDogId,
   dogs,
   onToggle,
@@ -81,8 +81,8 @@ export default function EventsList({
     ? events
     : events.filter((ev) => {
         const key = getKey(ev);
-        // Mantener visible el ítem recién completado hasta que termine el confetti
-        if (key === justCompletedKey) return true;
+        // Mantener visible los ítems recién completados hasta que termine el confetti
+        if (justCompletedKeys && justCompletedKeys.has(key)) return true;
         return !completions[key];
       });
 

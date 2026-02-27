@@ -61,7 +61,7 @@ export default function LoginScreen() {
   const isLogin = mode === "login";
 
   return (
-    <div className="min-h-screen flex flex-col bg-indigo-600">
+    <div className="min-h-svh flex flex-col bg-indigo-600">
       <div className="flex-1 flex flex-col justify-center px-6 py-12">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">

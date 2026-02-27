@@ -34,8 +34,8 @@ export default function ConfettiEffect({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const PIECES = 52;
-    const MAX_DURATION = 2800; // ms — duración máx de una pieza + delay
+    const PIECES = 48;
+    const MAX_DURATION = 2000; // ms — duración máx de una pieza + delay
     const pieces: HTMLElement[] = [];
 
     for (let i = 0; i < PIECES; i++) {
