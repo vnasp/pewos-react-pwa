@@ -18,10 +18,9 @@ import type { HomeEvent } from "./types";
 interface EventsListProps {
   events: HomeEvent[];
   completions: Record<string, Completion | null>;
-  justCompletedKeys?: Set<string>;
   selectedDogId: string | null;
   dogs: Dog[];
-  onToggle: (ev: HomeEvent, x: number, y: number) => void;
+  onToggle: (ev: HomeEvent) => void;
 }
 
 function getKey(ev: HomeEvent): string {
@@ -64,7 +63,6 @@ const typeConfig = {
 export default function EventsList({
   events,
   completions,
-  justCompletedKeys,
   selectedDogId,
   dogs,
   onToggle,
@@ -79,12 +77,7 @@ export default function EventsList({
   const pendingCount = events.length - doneCount;
   const visibleEvents = showCompleted
     ? events
-    : events.filter((ev) => {
-        const key = getKey(ev);
-        // Mantener visible los ítems recién completados hasta que termine el confetti
-        if (justCompletedKeys && justCompletedKeys.has(key)) return true;
-        return !completions[key];
-      });
+    : events.filter((ev) => !completions[getKey(ev)]);
 
   const heading =
     events.length === 0
@@ -176,16 +169,7 @@ export default function EventsList({
                 </div>
 
                 <button
-                  onClick={(e) => {
-                    const rect = (
-                      e.currentTarget as HTMLButtonElement
-                    ).getBoundingClientRect();
-                    onToggle(
-                      ev,
-                      rect.left + rect.width / 2,
-                      rect.top + rect.height / 2,
-                    );
-                  }}
+                  onClick={() => onToggle(ev)}
                   className="shrink-0 text-gray-400 active:scale-90 transition-transform"
                 >
                   {isDone ? (

@@ -4,7 +4,6 @@ import { useMedication } from "../context/MedicationContext";
 import { useExercise } from "../context/ExerciseContext";
 import { useCare } from "../context/CareContext";
 import { useDogs } from "../context/DogsContext";
-import ConfettiEffect from "../components/ConfettiEffect";
 import QuickAccess from "../components/home/QuickAccess";
 import DogFilterTabs from "../components/home/DogFilterTabs";
 import EventsList from "../components/home/EventsList";
@@ -48,12 +47,6 @@ export default function HomeScreen({
   const [completions, setCompletions] = useState<
     Record<string, Completion | null>
   >({});
-  const [confetti, setConfetti] = useState<{ x: number; y: number } | null>(
-    null,
-  );
-  const [justCompletedKeys, setJustCompletedKeys] = useState<Set<string>>(
-    new Set(),
-  );
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
 
@@ -260,19 +253,10 @@ export default function HomeScreen({
   }, [allEvents.length]);
 
   const handleToggle = useCallback(
-    async (ev: HomeEvent, clickX: number, clickY: number) => {
+    async (ev: HomeEvent) => {
       // Prevenir clicks múltiples simultáneos
       if (isProcessing) return;
       setIsProcessing(true);
-
-      const key = (() => {
-        if (ev.type === "appointment") return `appointment-${ev.data.id}`;
-        if (ev.type === "medication")
-          return `medication-${ev.medicationId}-${ev.scheduledTime}`;
-        if (ev.type === "care") return `care-${ev.careId}-${ev.scheduledTime}`;
-        return `exercise-${ev.exerciseId}-${ev.scheduledTime}`;
-      })();
-      const wasCompleted = !!completions[key];
 
       if (ev.type === "appointment") {
         await markAppointmentCompleted(ev.data.id, "");
@@ -301,23 +285,10 @@ export default function HomeScreen({
         }));
       }
 
-      // Solo lanzar confetti al MARCAR como completado (no al desmarcar)
-      if (!wasCompleted) {
-        setJustCompletedKeys((prev) => new Set(prev).add(key));
-        setConfetti({ x: clickX, y: clickY });
-      } else {
-        setJustCompletedKeys((prev) => {
-          const next = new Set(prev);
-          next.delete(key);
-          return next;
-        });
-      }
-
       setIsProcessing(false);
     },
     [
       isProcessing,
-      completions,
       markAppointmentCompleted,
       markMedicationCompleted,
       markExerciseCompleted,
@@ -330,44 +301,27 @@ export default function HomeScreen({
   );
 
   return (
-    <>
-      <div className="flex flex-col h-full overflow-y-auto pb-4">
-        <QuickAccess
-          onNavigateToMedications={onNavigateToMedications}
-          onNavigateToCalendar={onNavigateToCalendar}
-          onNavigateToExercises={onNavigateToExercises}
-          onNavigateToCares={onNavigateToCares}
-        />
-        <DogFilterTabs
-          dogs={dogs}
-          selectedDogId={selectedDogId}
-          onSelect={setSelectedDogId}
-          totalCount={allEvents.length}
-          countByDog={countByDog}
-        />
-        <EventsList
-          events={filteredEvents}
-          completions={completions}
-          justCompletedKeys={justCompletedKeys}
-          selectedDogId={selectedDogId}
-          dogs={dogs}
-          onToggle={handleToggle}
-        />
-      </div>
-
-      {confetti && (
-        <ConfettiEffect
-          originX={confetti.x}
-          originY={confetti.y}
-          onDone={() => {
-            setConfetti(null);
-            // No limpiar justCompletedKeys aquí - se limpiarán después de que desaparezcan de la vista
-            setTimeout(() => {
-              setJustCompletedKeys(new Set());
-            }, 300); // Dar tiempo para que la animación de opacidad se complete
-          }}
-        />
-      )}
-    </>
+    <div className="flex flex-col h-full overflow-y-auto pb-4">
+      <QuickAccess
+        onNavigateToMedications={onNavigateToMedications}
+        onNavigateToCalendar={onNavigateToCalendar}
+        onNavigateToExercises={onNavigateToExercises}
+        onNavigateToCares={onNavigateToCares}
+      />
+      <DogFilterTabs
+        dogs={dogs}
+        selectedDogId={selectedDogId}
+        onSelect={setSelectedDogId}
+        totalCount={allEvents.length}
+        countByDog={countByDog}
+      />
+      <EventsList
+        events={filteredEvents}
+        completions={completions}
+        selectedDogId={selectedDogId}
+        dogs={dogs}
+        onToggle={handleToggle}
+      />
+    </div>
   );
 }
