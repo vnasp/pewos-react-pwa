@@ -92,7 +92,7 @@ export default function TabBar({
 }: TabBarProps) {
   return (
     <nav
-    <nav className={`bg-indigo-600 border-t border-indigo-700 pb-safe lg:border-t-0 lg:border-r lg:pb-0 lg:w-24 lg:shrink-0 ${className}`}>
+      className={`bg-indigo-600 border-t border-indigo-700 pb-safe lg:border-t-0 lg:border-r lg:pb-0 lg:w-24 lg:shrink-0 ${className}`}
     >
       <div className="flex pt-2.5 min-h-16 lg:flex-col lg:pt-8 lg:min-h-0 lg:h-full lg:gap-4">
         {tabs.map((tab) => {
