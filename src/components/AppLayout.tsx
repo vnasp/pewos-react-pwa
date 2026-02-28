@@ -252,10 +252,14 @@ export default function AppLayout() {
 
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Sidebar para desktop */}
-        <TabBar currentScreen={currentTab} onNavigate={handleTabNavigate} />
+        <TabBar
+          currentScreen={currentTab}
+          onNavigate={handleTabNavigate}
+          className="order-2 lg:order-1"
+        />
 
         {/* Contenido principal */}
-        <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="flex flex-col flex-1 overflow-hidden order-1 lg:order-2">
           <Header
             title1={title1}
             title2={title2}

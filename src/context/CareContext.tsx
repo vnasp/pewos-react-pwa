@@ -180,7 +180,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
       user_id: user.id,
       item_type: "care",
       item_id: id,
-      scheduled_time: scheduledTime || null,
+      scheduled_time: scheduledTime || "",
       completed_date: formatLocalDate(new Date()),
     });
   };
