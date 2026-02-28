@@ -15,7 +15,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // @ts-ignore — web-push ESM via esm.sh
 import webpush from "https://esm.sh/web-push@3";
 
-const WINDOW_MIN = 15; // enviar con hasta X minutos de anticipación
+const WINDOW_MIN = 20; // enviar con hasta X minutos de anticipación (mayor que frecuencia del CRON para no perder notificaciones)
 
 Deno.serve(async () => {
   const supabase = createClient(
@@ -60,8 +60,19 @@ Deno.serve(async () => {
 
   // ── Recopilar notificaciones pendientes por usuario ────────────────────
   const pending = new Map<string, { title: string; body: string }[]>();
+  const processed = new Set<string>(); // Deduplicación: "userId:itemType:itemId:time:date"
 
-  const add = (userId: string, n: { title: string; body: string }) => {
+  const add = (
+    userId: string,
+    itemType: string,
+    itemId: string,
+    time: string,
+    n: { title: string; body: string },
+  ) => {
+    const key = `${userId}:${itemType}:${itemId}:${time}:${todayStr}`;
+    if (processed.has(key)) return; // Ya procesado en esta ejecución
+    processed.add(key);
+
     if (!pending.has(userId)) pending.set(userId, []);
     pending.get(userId)!.push(n);
   };
@@ -70,14 +81,14 @@ Deno.serve(async () => {
   const { data: apts } = await supabase
     .from("appointments")
     .select(
-      "user_id,dog_name,time,type,custom_type_description,notification_time",
+      "id,user_id,dog_name,time,type,custom_type_description,notification_time",
     )
     .eq("date", todayStr)
     .neq("notification_time", "none");
 
   for (const a of apts ?? []) {
     if (!isDue(a.time, a.notification_time)) continue;
-    add(a.user_id, {
+    add(a.user_id, "appointment", a.id, a.time, {
       title: `🐾 Cita de ${a.dog_name}`,
       body: a.custom_type_description ?? a.type,
     });
@@ -87,7 +98,7 @@ Deno.serve(async () => {
   const { data: meds } = await supabase
     .from("medications")
     .select(
-      "user_id,dog_name,name,dosage,scheduled_times,notification_time,is_active,start_date,end_date,duration_days",
+      "id,user_id,dog_name,name,dosage,scheduled_times,notification_time,is_active,start_date,end_date,duration_days",
     )
     .eq("is_active", true)
     .neq("notification_time", "none");
@@ -98,7 +109,7 @@ Deno.serve(async () => {
     if (m.duration_days > 0 && m.end_date?.slice(0, 10) < todayStr) continue;
     for (const t of m.scheduled_times ?? []) {
       if (!isDue(t, m.notification_time)) continue;
-      add(m.user_id, {
+      add(m.user_id, "medication", m.id, t, {
         title: `💊 Medicamento de ${m.dog_name}`,
         body: `${m.name}${m.dosage ? ` — ${m.dosage}` : ""}`,
       });
@@ -109,7 +120,7 @@ Deno.serve(async () => {
   const { data: exs } = await supabase
     .from("exercises")
     .select(
-      "user_id,dog_name,type,custom_type_description,duration_minutes,scheduled_times,notification_time,is_active,start_date,end_date,is_permanent",
+      "id,user_id,dog_name,type,custom_type_description,duration_minutes,scheduled_times,notification_time,is_active,start_date,end_date,is_permanent",
     )
     .eq("is_active", true)
     .neq("notification_time", "none");
@@ -119,7 +130,7 @@ Deno.serve(async () => {
     if (!e.is_permanent && e.end_date?.slice(0, 10) < todayStr) continue;
     for (const t of e.scheduled_times ?? []) {
       if (!isDue(t, e.notification_time)) continue;
-      add(e.user_id, {
+      add(e.user_id, "exercise", e.id, t, {
         title: `🏃 Ejercicio de ${e.dog_name}`,
         body: `${e.custom_type_description ?? e.type} — ${e.duration_minutes} min`,
       });
@@ -130,7 +141,7 @@ Deno.serve(async () => {
   const { data: caresList } = await supabase
     .from("cares")
     .select(
-      "user_id,dog_name,type,custom_type_description,duration_minutes,scheduled_times,notification_time,is_active,start_date,end_date,is_permanent",
+      "id,user_id,dog_name,type,custom_type_description,duration_minutes,scheduled_times,notification_time,is_active,start_date,end_date,is_permanent",
     )
     .eq("is_active", true)
     .neq("notification_time", "none");
@@ -140,7 +151,7 @@ Deno.serve(async () => {
     if (!c.is_permanent && c.end_date?.slice(0, 10) < todayStr) continue;
     for (const t of c.scheduled_times ?? []) {
       if (!isDue(t, c.notification_time)) continue;
-      add(c.user_id, {
+      add(c.user_id, "care", c.id, t, {
         title: `❤️ Cuidado de ${c.dog_name}`,
         body: `${c.custom_type_description ?? c.type} — ${c.duration_minutes} min`,
       });
