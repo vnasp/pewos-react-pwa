@@ -116,6 +116,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase
       .from("medications")
       .update({
+        dog_id: m.dogId,
         name: m.name,
         dosage: m.dosage,
         schedule_type: m.scheduleType,

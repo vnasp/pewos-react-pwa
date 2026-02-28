@@ -156,6 +156,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase
       .from("exercises")
       .update({
+        dog_id: e.dogId,
         type: e.type,
         custom_type_description: e.customTypeDescription ?? null,
         duration_minutes: e.durationMinutes,
