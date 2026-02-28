@@ -77,7 +77,8 @@ export function useNotificationScheduler() {
         if (matches) dates.push(new Date(apt.date));
       }
 
-      for (const _ of dates) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for (const _date of dates) {
         const mins = notificationMinutesFor(apt.notificationTime);
         const ts = timeStringToTimestamp(apt.time, mins);
         notifications.push({

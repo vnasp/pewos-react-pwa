@@ -37,7 +37,7 @@ export default function DogsListScreen({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {dogs.map((dog) => (
             <div key={dog.id} className="bg-white rounded-2xl p-4 shadow-sm">
               <div className="flex gap-4">

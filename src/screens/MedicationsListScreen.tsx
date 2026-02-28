@@ -3,7 +3,7 @@ import {
   Clock,
   Calendar,
   Bell,
-  Infinity,
+  Infinity as InfinityIcon,
   AlertTriangle,
   CheckCircle,
   X,
@@ -123,7 +123,7 @@ export default function MedicationsListScreen({
                       {dog.name}
                     </span>
                   </div>
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {meds.map((med) => {
                       const isContinuous = med.durationDays === 0;
                       const days = daysRemaining(med.endDate);
@@ -203,7 +203,7 @@ export default function MedicationsListScreen({
                               )}
                               {isContinuous && (
                                 <div className="flex items-center gap-1">
-                                  <Infinity
+                                  <InfinityIcon
                                     size={13}
                                     className="text-blue-600"
                                   />

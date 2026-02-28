@@ -37,6 +37,7 @@ export default function InstallBanner() {
     if (localStorage.getItem("pwa_install_dismissed")) return;
 
     const p = detectPlatform();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPlatform(p);
 
     if (p === "chromium") {

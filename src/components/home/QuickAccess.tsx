@@ -52,16 +52,16 @@ export default function QuickAccess({
   };
 
   return (
-    <div className="grid grid-cols-4 gap-3 px-5 pt-6 pb-4">
+    <div className="grid grid-cols-4 gap-3 px-5 pt-6 pb-4 lg:grid-cols-4 lg:max-w-4xl lg:mx-auto">
       {items.map(({ label, icon: Icon, bg, fg, key }) => (
         <button
           key={key}
           onClick={actions[key]}
-          className={`${bg} rounded-xl flex flex-col items-center justify-center gap-1.5 py-3 active:scale-95 transition-transform`}
+          className={`${bg} rounded-xl flex flex-col items-center justify-center gap-1.5 py-3 lg:py-4 active:scale-95 transition-transform hover:scale-105`}
         >
-          <Icon size={22} className={fg} />
+          <Icon size={22} className={`${fg} lg:w-6 lg:h-6`} />
           <span
-            className={`text-[10px] font-semibold ${fg} leading-tight text-center`}
+            className={`text-[10px] lg:text-xs font-semibold ${fg} leading-tight text-center`}
           >
             {label}
           </span>

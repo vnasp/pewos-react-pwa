@@ -57,7 +57,7 @@ export default function OnboardingScreen({ onContinue }: Props) {
         <div className="pb-10 px-5">
           <button
             onClick={onContinue}
-            className="w-full h-16 rounded-full bg-[#f97316] text-white text-base font-semibold active:opacity-80 transition-opacity"
+            className="w-full lg:max-w-md lg:mx-auto h-16 rounded-full bg-[#f97316] text-white text-base font-semibold active:opacity-80 transition-opacity lg:block"
           >
             Comenzar
           </button>

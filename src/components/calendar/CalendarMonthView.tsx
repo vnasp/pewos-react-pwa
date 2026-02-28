@@ -59,6 +59,7 @@ export default function CalendarMonthView({
       }
     });
     return map;
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [appointments, year, month]);
 
   const cells: (number | null)[] = [

@@ -38,7 +38,7 @@ export default function SharedAccessScreen() {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-6 px-5 pt-5">
+    <div className="flex flex-col h-full overflow-y-auto pb-6 px-5 pt-5 lg:max-w-3xl lg:mx-auto lg:w-full">
       {/* Enviar invitación */}
       <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
         <h2 className="text-gray-900 font-bold text-base mb-3">

@@ -187,7 +187,7 @@ export default function AddEditMedicationScreen({
 
   return (
     <div className="flex flex-col h-full overflow-y-auto pb-6">
-      <div className="px-5 pt-5 pb-3 flex items-center gap-2">
+      <div className="px-5 pt-5 pb-3 flex items-center gap-2 lg:max-w-3xl lg:mx-auto lg:w-full">
         <button
           onClick={onNavigateBack}
           className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center active:scale-90 transition-transform shrink-0"
@@ -199,7 +199,7 @@ export default function AddEditMedicationScreen({
         </h2>
       </div>
 
-      <div className="px-5 flex flex-col gap-4">
+      <div className="px-5 flex flex-col gap-4 lg:max-w-3xl lg:mx-auto lg:w-full">
         {/* Mascota */}
         <div>
           <label className="text-gray-700 font-semibold text-sm block mb-2">

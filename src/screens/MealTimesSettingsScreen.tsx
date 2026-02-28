@@ -62,7 +62,7 @@ export default function MealTimesSettingsScreen() {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-6 px-5 pt-5">
+    <div className="flex flex-col h-full overflow-y-auto pb-6 px-5 pt-5 lg:max-w-3xl lg:mx-auto lg:w-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-gray-900 font-bold text-lg">Horarios de Comida</h2>
         {!isAdding && (

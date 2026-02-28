@@ -68,7 +68,7 @@ export default function SettingsScreen({
   return (
     <div className="flex flex-col h-full overflow-y-auto pb-6">
       {/* User info */}
-      <div className="px-5 pt-6 pb-4">
+      <div className="px-5 pt-6 pb-4 lg:max-w-3xl lg:mx-auto lg:w-full">
         <div className="bg-indigo-50 rounded-2xl p-4 flex items-center gap-3">
           <div className="w-12 h-12 bg-indigo-200 rounded-full flex items-center justify-center">
             <span className="text-indigo-700 font-bold text-lg uppercase">
@@ -86,7 +86,10 @@ export default function SettingsScreen({
 
       {/* Sections */}
       {sections.map((section) => (
-        <div key={section.title} className="px-5 mb-5">
+        <div
+          key={section.title}
+          className="px-5 mb-5 lg:max-w-3xl lg:mx-auto lg:w-full"
+        >
           <p className="text-gray-500 text-xs font-semibold uppercase mb-3">
             {section.title}
           </p>
@@ -113,7 +116,7 @@ export default function SettingsScreen({
       ))}
 
       {/* Sign out */}
-      <div className="px-5">
+      <div className="px-5 lg:max-w-3xl lg:mx-auto lg:w-full">
         <button
           onClick={handleSignOut}
           className="w-full bg-red-50 text-red-600 font-semibold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-transform"

@@ -131,7 +131,7 @@ export default function EventsList({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {visibleEvents.map((ev) => {
             const cfg = typeConfig[ev.type];
             const Icon = cfg.icon;
@@ -171,9 +171,7 @@ export default function EventsList({
                 <button
                   onClick={() => onToggle(ev)}
                   className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-all ${
-                    isDone
-                      ? "bg-green-500"
-                      : "bg-indigo-600 hover:bg-indigo-700"
+                    isDone ? "bg-green-500" : "bg-gray-400 hover:bg-gray-500"
                   }`}
                 >
                   <Check size={20} className="text-white" strokeWidth={3} />

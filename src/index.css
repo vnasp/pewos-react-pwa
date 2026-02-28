@@ -30,6 +30,14 @@
   padding: 0;
 }
 
+@media (min-width: 1024px) {
+  #root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
 body {
   @apply bg-background text-foreground font-sans;
   font-weight: 500;

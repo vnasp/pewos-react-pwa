@@ -301,7 +301,7 @@ export default function HomeScreen({
   );
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-4">
+    <div className="flex flex-col h-full overflow-y-auto pb-4 lg:pb-8">
       <QuickAccess
         onNavigateToMedications={onNavigateToMedications}
         onNavigateToCalendar={onNavigateToCalendar}

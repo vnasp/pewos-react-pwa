@@ -225,16 +225,24 @@ export default function AppLayout() {
   return (
     <div className="flex flex-col h-svh w-full overflow-hidden">
       <InstallBanner />
-      <Header
-        title1={title1}
-        title2={title2}
-        showAddButton={showAddForTab || showAddForSub}
-        onAddPress={showAddForSub ? handleAddSub : handleAdd}
-      />
-      <main className="flex-1 bg-white rounded-t-[30px] -mt-7.5 overflow-y-auto relative z-10">
-        {renderContent()}
-      </main>
-      <TabBar currentScreen={currentTab} onNavigate={handleTabNavigate} />
+
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+        {/* Sidebar para desktop */}
+        <TabBar currentScreen={currentTab} onNavigate={handleTabNavigate} />
+
+        {/* Contenido principal */}
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <Header
+            title1={title1}
+            title2={title2}
+            showAddButton={showAddForTab || showAddForSub}
+            onAddPress={showAddForSub ? handleAddSub : handleAdd}
+          />
+          <main className="flex-1 bg-white rounded-t-[30px] lg:rounded-t-[40px] -mt-7.5 overflow-y-auto relative z-10 lg:max-w-6xl lg:mx-auto lg:w-full">
+            {renderContent()}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

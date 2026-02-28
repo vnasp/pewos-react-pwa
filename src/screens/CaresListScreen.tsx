@@ -114,7 +114,7 @@ export default function CaresListScreen({
                       {dog.name}
                     </span>
                   </div>
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {items.map((care) => (
                       <div
                         key={care.id}

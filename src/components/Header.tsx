@@ -17,7 +17,7 @@ export default function Header({
 }: HeaderProps) {
   return (
     <header className="bg-indigo-600 pb-10 pt-safe">
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center justify-between px-6 py-4 lg:max-w-7xl lg:mx-auto">
         {/* Texto */}
         <div className="flex-1">
           <p className="text-[22px] font-normal text-white opacity-90 mb-1 leading-tight">

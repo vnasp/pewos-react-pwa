@@ -108,7 +108,11 @@ export default function CalendarListScreen({
   const toggleMonth = useCallback((key: string) => {
     setOpenMonths((prev) => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
       return next;
     });
   }, []);
@@ -243,7 +247,7 @@ export default function CalendarListScreen({
                 <p className="mt-3 text-sm text-center">Sin citas este día</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
                 {selectedDayAppointments.map((apt) => (
                   <AppointmentCard
                     key={apt.id}

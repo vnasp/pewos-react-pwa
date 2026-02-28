@@ -86,20 +86,22 @@ interface TabBarProps {
 
 export default function TabBar({ currentScreen, onNavigate }: TabBarProps) {
   return (
-    <nav className="bg-indigo-600 border-t border-indigo-700 pb-safe">
-      <div className="flex pt-2.5 min-h-16">
+    <nav className="bg-indigo-600 border-t border-indigo-700 pb-safe lg:border-t-0 lg:border-r lg:pb-0 lg:w-24 lg:flex-shrink-0">
+      <div className="flex pt-2.5 min-h-16 lg:flex-col lg:pt-8 lg:min-h-0 lg:h-full lg:gap-4">
         {tabs.map((tab) => {
           const isActive = currentScreen === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => onNavigate(tab.id)}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-opacity ${
-                isActive ? "text-white" : "text-white/50"
+              className={`flex-1 lg:flex-none flex flex-col items-center justify-center gap-1 transition-opacity lg:py-4 ${
+                isActive ? "text-white" : "text-white/50 hover:text-white/70"
               }`}
             >
               {tab.icon(isActive)}
-              <span className="text-[10px] font-semibold">{tab.label}</span>
+              <span className="text-[10px] font-semibold lg:text-xs">
+                {tab.label}
+              </span>
             </button>
           );
         })}

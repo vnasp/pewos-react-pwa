@@ -73,7 +73,7 @@ export default function AddEditDogScreen({
   return (
     <div className="flex flex-col h-full overflow-y-auto pb-6">
       {/* Back row */}
-      <div className="px-5 pt-5 pb-3 flex items-center gap-2">
+      <div className="px-5 pt-5 pb-3 flex items-center gap-2 lg:max-w-2xl lg:mx-auto lg:w-full">
         <button
           onClick={onNavigateBack}
           className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center active:scale-90 transition-transform shrink-0"
@@ -85,7 +85,7 @@ export default function AddEditDogScreen({
         </h2>
       </div>
 
-      <div className="px-5 flex flex-col gap-4">
+      <div className="px-5 flex flex-col gap-4 lg:max-w-2xl lg:mx-auto lg:w-full">
         {/* Foto */}
         <div className="flex flex-col items-center py-2">
           <button

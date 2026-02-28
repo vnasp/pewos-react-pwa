@@ -62,7 +62,7 @@ function scheduleOne(n: ScheduledNotification) {
           tag: n.id,
           data: { url: "/" },
         });
-      } catch (_) {
+      } catch {
         // Permiso revocado u otro error — silencioso
       }
     },
