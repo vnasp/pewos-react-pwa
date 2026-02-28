@@ -4,8 +4,8 @@ import {
   Pill,
   Dumbbell,
   HeartPulse,
+  Check,
   CheckCircle2,
-  Circle,
   Eye,
   EyeOff,
 } from "lucide-react";
@@ -170,13 +170,13 @@ export default function EventsList({
 
                 <button
                   onClick={() => onToggle(ev)}
-                  className="shrink-0 text-gray-400 active:scale-90 transition-transform"
+                  className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center active:scale-90 transition-all ${
+                    isDone
+                      ? "bg-green-500"
+                      : "bg-indigo-600 hover:bg-indigo-700"
+                  }`}
                 >
-                  {isDone ? (
-                    <CheckCircle2 size={24} className="text-green-500" />
-                  ) : (
-                    <Circle size={24} />
-                  )}
+                  <Check size={20} className="text-white" strokeWidth={3} />
                 </button>
               </div>
             );
