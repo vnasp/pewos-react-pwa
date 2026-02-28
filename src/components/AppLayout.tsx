@@ -21,6 +21,8 @@ import AddEditCareScreen from "../screens/AddEditCareScreen";
 import MealTimesSettingsScreen from "../screens/MealTimesSettingsScreen";
 import SharedAccessScreen from "../screens/SharedAccessScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import VeterinariansListScreen from "../screens/VeterinariansListScreen";
+import AddEditVeterinarianScreen from "../screens/AddEditVeterinarianScreen";
 
 type Tab = "home" | "pets" | "appointments" | "settings";
 
@@ -35,7 +37,9 @@ type SubScreen =
   | { kind: "sharedAccess" }
   | { kind: "medications" }
   | { kind: "exercises" }
-  | { kind: "cares" };
+  | { kind: "cares" }
+  | { kind: "veterinarians" }
+  | { kind: "addEditVeterinarian"; veterinarianId?: string };
 
 const screenTitles: Record<Tab, { title1: string; title2: string }> = {
   home: { title1: "Recordatorios", title2: "de Hoy" },
@@ -57,6 +61,8 @@ const subScreenTitles: Partial<
   medications: { title1: "Medica-", title2: "mentos" },
   exercises: { title1: "Rutinas de", title2: "Ejercicio" },
   cares: { title1: "Cuidados", title2: "Operatorios" },
+  veterinarians: { title1: "Veteri-", title2: "narios" },
+  addEditVeterinarian: { title1: "Veteri-", title2: "nario" },
 };
 
 export default function AppLayout() {
@@ -91,7 +97,8 @@ export default function AppLayout() {
   const showAddForSub =
     subScreen.kind === "medications" ||
     subScreen.kind === "exercises" ||
-    subScreen.kind === "cares";
+    subScreen.kind === "cares" ||
+    subScreen.kind === "veterinarians";
 
   const handleAdd = () => {
     if (currentTab === "pets") setSubScreen({ kind: "addEditDog" });
@@ -104,6 +111,8 @@ export default function AppLayout() {
     else if (subScreen.kind === "exercises")
       setSubScreen({ kind: "addEditExercise" });
     else if (subScreen.kind === "cares") setSubScreen({ kind: "addEditCare" });
+    else if (subScreen.kind === "veterinarians")
+      setSubScreen({ kind: "addEditVeterinarian" });
   };
 
   const renderContent = () => {
@@ -169,6 +178,21 @@ export default function AppLayout() {
             onNavigateToAddEdit={(id) =>
               setSubScreen({ kind: "addEditCare", careId: id })
             }
+          />
+        );
+      case "veterinarians":
+        return (
+          <VeterinariansListScreen
+            onNavigateToAddEdit={(id) =>
+              setSubScreen({ kind: "addEditVeterinarian", veterinarianId: id })
+            }
+          />
+        );
+      case "addEditVeterinarian":
+        return (
+          <AddEditVeterinarianScreen
+            veterinarianId={subScreen.veterinarianId}
+            onNavigateBack={handleBack}
           />
         );
     }
@@ -237,6 +261,7 @@ export default function AppLayout() {
             title2={title2}
             showAddButton={showAddForTab || showAddForSub}
             onAddPress={showAddForSub ? handleAddSub : handleAdd}
+            onVetPress={() => setSubScreen({ kind: "veterinarians" })}
           />
           <main className="flex-1 bg-white rounded-t-[30px] lg:rounded-t-[40px] -mt-7.5 overflow-y-auto relative z-10 lg:max-w-6xl lg:mx-auto lg:w-full">
             {renderContent()}

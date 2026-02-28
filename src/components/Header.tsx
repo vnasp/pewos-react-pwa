@@ -6,6 +6,7 @@ interface HeaderProps {
   showAddButton?: boolean;
   onAddPress?: () => void;
   rightContent?: ReactNode;
+  onVetPress?: () => void;
 }
 
 export default function Header({
@@ -14,6 +15,7 @@ export default function Header({
   showAddButton = false,
   onAddPress,
   rightContent,
+  onVetPress,
 }: HeaderProps) {
   return (
     <header className="bg-indigo-600 pb-10 pt-safe">
@@ -30,12 +32,18 @@ export default function Header({
 
         {/* Derecha */}
         <div className="flex items-center gap-3">
-          <img
-            src="/assets/vet-icon.webp"
-            alt="Pewos Agenda"
-            className="w-auto h-7.25 brightness-0 invert"
-            fetchPriority="high"
-          />
+          <button
+            onClick={onVetPress}
+            className="active:opacity-70 transition-opacity"
+            aria-label="Veterinarios"
+          >
+            <img
+              src="/assets/vet-icon.webp"
+              alt="Veterinarios"
+              className="w-auto h-7.25 brightness-0 invert"
+              fetchPriority="high"
+            />
+          </button>
           {showAddButton && onAddPress && (
             <button
               onClick={onAddPress}

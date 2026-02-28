@@ -12,6 +12,7 @@ import { ExerciseProvider } from "./context/ExerciseContext";
 import { CareProvider } from "./context/CareContext";
 import { MealTimesProvider } from "./context/MealTimesContext";
 import { SharedAccessProvider } from "./context/SharedAccessContext";
+import { VeterinariansProvider } from "./context/VeterinariansContext";
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -46,7 +47,9 @@ function AppContent() {
             <CareProvider>
               <MealTimesProvider>
                 <SharedAccessProvider>
-                  <AppLayout />
+                  <VeterinariansProvider>
+                    <AppLayout />
+                  </VeterinariansProvider>
                 </SharedAccessProvider>
               </MealTimesProvider>
             </CareProvider>

@@ -426,3 +426,40 @@ CREATE POLICY "Users can view own and shared cares"
 CREATE POLICY "Users can insert own cares"  ON cares FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own cares"  ON cares FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own cares"  ON cares FOR DELETE USING (auth.uid() = user_id);
+
+
+-- =============================================================
+-- Migración 2026-02-28: Veterinarios
+-- =============================================================
+
+CREATE TABLE veterinarians (
+  id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id      UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  dog_id       UUID NOT NULL,
+  dog_name     TEXT NOT NULL,
+  name         TEXT NOT NULL,
+  clinic_name  TEXT,
+  phone        TEXT,
+  email        TEXT,
+  address      TEXT,
+  notes        TEXT,
+  created_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE veterinarians ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own veterinarians"
+  ON veterinarians FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own veterinarians"
+  ON veterinarians FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own veterinarians"
+  ON veterinarians FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own veterinarians"
+  ON veterinarians FOR DELETE
+  USING (auth.uid() = user_id);

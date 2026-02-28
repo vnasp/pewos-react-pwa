@@ -158,3 +158,16 @@ export interface SharedAccess {
   status: "pending" | "accepted" | "rejected";
   createdAt: Date;
 }
+
+export interface Veterinarian {
+  id: string;
+  userId: string;
+  dogId: string;
+  dogName: string;
+  name: string;
+  clinicName?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+}
