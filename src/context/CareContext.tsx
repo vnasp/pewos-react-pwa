@@ -65,6 +65,7 @@ function mapCare(row: any): Care {
     notes: row.notes ?? undefined,
     isActive: row.is_active ?? true,
     notificationTime: row.notification_time ?? "none",
+    daysOfWeek: row.days_of_week ?? undefined,
   };
 }
 
@@ -122,6 +123,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
       notes: c.notes ?? null,
       is_active: c.isActive,
       notification_time: c.notificationTime,
+      days_of_week: c.daysOfWeek ?? null,
     });
     if (error) throw error;
     await loadCares();
@@ -147,6 +149,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
         notes: c.notes ?? null,
         is_active: c.isActive,
         notification_time: c.notificationTime,
+        days_of_week: c.daysOfWeek ?? null,
       })
       .eq("id", id)
       .eq("user_id", user.id);

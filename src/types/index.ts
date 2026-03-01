@@ -129,6 +129,7 @@ export interface Care {
   notes?: string;
   isActive: boolean;
   notificationTime: NotificationTime;
+  daysOfWeek?: number[]; // 0=Domingo, 1=Lunes, ..., 6=Sábado. undefined = todos los días
 }
 
 export interface MealTime {

@@ -70,6 +70,9 @@ export default function AddEditCareScreen({
   const [notificationTime, setNotificationTime] = useState<NotificationTime>(
     existing?.notificationTime ?? "15min",
   );
+  const [daysOfWeek, setDaysOfWeek] = useState<number[]>(
+    existing?.daysOfWeek ?? [],
+  );
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(
     existing?.scheduledTimes ?? [],
   );
@@ -134,6 +137,7 @@ export default function AddEditCareScreen({
         notes: notes.trim(),
         isActive: existing?.isActive ?? true,
         notificationTime,
+        daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
       };
       if (isEditing && careId) await updateCare(careId, data);
       else await addCare(data);
@@ -325,6 +329,61 @@ export default function AddEditCareScreen({
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
+          )}
+        </div>
+
+        {/* Días de la semana */}
+        <div>
+          <label className="text-gray-700 font-semibold text-sm block mb-2">
+            Días de la semana
+          </label>
+          <p className="text-gray-600 text-xs mb-2">
+            Selecciona los días en que se realiza el cuidado. Si no se
+            selecciona ninguno, se aplicará todos los días.
+          </p>
+          <div className="grid grid-cols-7 gap-2">
+            {[
+              { value: 1, label: "L", fullLabel: "Lunes" },
+              { value: 2, label: "M", fullLabel: "Martes" },
+              { value: 3, label: "X", fullLabel: "Miércoles" },
+              { value: 4, label: "J", fullLabel: "Jueves" },
+              { value: 5, label: "V", fullLabel: "Viernes" },
+              { value: 6, label: "S", fullLabel: "Sábado" },
+              { value: 0, label: "D", fullLabel: "Domingo" },
+            ].map((day) => (
+              <button
+                key={day.value}
+                type="button"
+                onClick={() => {
+                  setDaysOfWeek((prev) =>
+                    prev.includes(day.value)
+                      ? prev.filter((d) => d !== day.value)
+                      : [...prev, day.value].sort((a, b) => a - b),
+                  );
+                }}
+                className={`py-2.5 rounded-xl font-bold text-sm transition-colors ${
+                  daysOfWeek.includes(day.value)
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+                title={day.fullLabel}
+              >
+                {day.label}
+              </button>
+            ))}
+          </div>
+          {daysOfWeek.length > 0 && (
+            <p className="text-indigo-600 text-xs mt-2 font-semibold">
+              {daysOfWeek
+                .sort((a, b) => {
+                  const order = [1, 2, 3, 4, 5, 6, 0];
+                  return order.indexOf(a) - order.indexOf(b);
+                })
+                .map(
+                  (d) => ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][d],
+                )
+                .join(", ")}
+            </p>
           )}
         </div>
 

@@ -408,9 +408,13 @@ CREATE TABLE cares (
   notes                    TEXT,
   is_active                BOOLEAN DEFAULT true,
   notification_time        TEXT DEFAULT 'none',
+  -- Migración: 20260301_add_days_of_week_to_cares
+  days_of_week             INTEGER[],
   created_at               TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at               TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+COMMENT ON COLUMN cares.days_of_week IS 'Días de la semana en que se realiza el cuidado (0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado). NULL o vacío = todos los días';
 
 ALTER TABLE cares ENABLE ROW LEVEL SECURITY;
 

@@ -155,6 +155,33 @@ export default function CaresListScreen({
                                 </span>
                               </div>
                             )}
+                            {care.daysOfWeek && care.daysOfWeek.length > 0 && (
+                              <div className="flex items-center gap-1 mb-1">
+                                <Repeat size={13} className="text-indigo-500" />
+                                <span className="text-indigo-600 text-xs">
+                                  {care.daysOfWeek
+                                    .sort((a, b) => {
+                                      const order = [1, 2, 3, 4, 5, 6, 0];
+                                      return (
+                                        order.indexOf(a) - order.indexOf(b)
+                                      );
+                                    })
+                                    .map(
+                                      (d) =>
+                                        [
+                                          "Dom",
+                                          "Lun",
+                                          "Mar",
+                                          "Mié",
+                                          "Jue",
+                                          "Vie",
+                                          "Sáb",
+                                        ][d],
+                                    )
+                                    .join(", ")}
+                                </span>
+                              </div>
+                            )}
                             {!care.isPermanent &&
                               care.durationDays &&
                               care.endDate && (

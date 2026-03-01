@@ -151,6 +151,7 @@ export default function HomeScreen({
   const todayCares = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
+    const dayOfWeek = now.getDay(); // 0=Domingo, 1=Lunes, ..., 6=Sábado
     return cares
       .filter((c) => {
         if (!c.isActive) return false;
@@ -158,6 +159,10 @@ export default function HomeScreen({
         const start = new Date(c.startDate);
         start.setHours(0, 0, 0, 0);
         if (start.getTime() > now.getTime()) return false;
+        // Verificar si hoy es uno de los días especificados
+        if (c.daysOfWeek && c.daysOfWeek.length > 0) {
+          if (!c.daysOfWeek.includes(dayOfWeek)) return false;
+        }
         if (c.isPermanent) return true;
         if (c.endDate) {
           const end = new Date(c.endDate);
