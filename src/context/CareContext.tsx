@@ -46,6 +46,26 @@ interface CareContextType {
 
 const CareContext = createContext<CareContextType | undefined>(undefined);
 
+function calcTimes(
+  startTime: string,
+  endTime: string,
+  timesPerDay: number,
+): string[] {
+  if (!startTime || !endTime || timesPerDay < 1) return [];
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  const startMin = sh * 60 + sm;
+  const endMin = eh * 60 + em;
+  if (endMin <= startMin || timesPerDay === 0) return [startTime];
+  const interval = (endMin - startMin) / (timesPerDay - 1 || 1);
+  return Array.from({ length: timesPerDay }, (_, i) => {
+    const total = Math.round(startMin + interval * i);
+    const h = Math.floor(total / 60) % 24;
+    const m = total % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  });
+}
+
 function mapCare(row: any): Care {
   return {
     id: row.id,
@@ -57,7 +77,11 @@ function mapCare(row: any): Care {
     timesPerDay: row.times_per_day ?? 1,
     startTime: row.start_time,
     endTime: row.end_time,
-    scheduledTimes: row.scheduled_times ?? [],
+    scheduledTimes: (() => {
+      const times = row.scheduled_times;
+      if (times && times.length > 0) return times;
+      return calcTimes(row.start_time, row.end_time, row.times_per_day ?? 1);
+    })(),
     startDate: parseLocalDate(row.start_date),
     isPermanent: row.is_permanent ?? true,
     durationDays: row.duration_days ?? undefined,
@@ -65,7 +89,9 @@ function mapCare(row: any): Care {
     notes: row.notes ?? undefined,
     isActive: row.is_active ?? true,
     notificationTime: row.notification_time ?? "none",
-    daysOfWeek: row.days_of_week ?? undefined,
+    daysOfWeek: row.days_of_week
+      ? (row.days_of_week as unknown[]).map(Number)
+      : undefined,
   };
 }
 

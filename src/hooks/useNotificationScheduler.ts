@@ -146,6 +146,7 @@ export function useNotificationScheduler() {
     }
 
     // ── Cuidados post-op de hoy ───────────────────────────────────────────
+    const todayDayOfWeek = new Date().getDay();
     for (const care of cares) {
       if (!care.isActive || care.notificationTime === "none") continue;
       const start = new Date(care.startDate);
@@ -155,6 +156,10 @@ export function useNotificationScheduler() {
         const end = new Date(care.endDate);
         end.setHours(0, 0, 0, 0);
         if (end.getTime() < now) continue;
+      }
+      // Verificar si hoy es uno de los días configurados
+      if (care.daysOfWeek && care.daysOfWeek.length > 0) {
+        if (!care.daysOfWeek.map(Number).includes(todayDayOfWeek)) continue;
       }
 
       const label =
