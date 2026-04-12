@@ -113,7 +113,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { data, error } = await supabase
-        .from("exercises")
+        .from("pet_exercises")
         .select("*, dogs(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -129,7 +129,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
 
   const addExercise = async (e: Omit<Exercise, "id">) => {
     if (!user) return;
-    const { error } = await supabase.from("exercises").insert({
+    const { error } = await supabase.from("pet_exercises").insert({
       user_id: user.id,
       dog_id: e.dogId,
       type: e.type,
@@ -154,7 +154,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
   const updateExercise = async (id: string, e: Omit<Exercise, "id">) => {
     if (!user) return;
     const { error } = await supabase
-      .from("exercises")
+      .from("pet_exercises")
       .update({
         dog_id: e.dogId,
         type: e.type,
@@ -179,7 +179,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteExercise = async (id: string) => {
-    const { error } = await supabase.from("exercises").delete().eq("id", id);
+    const { error } = await supabase.from("pet_exercises").delete().eq("id", id);
     if (error) throw error;
     await loadExercises();
   };
@@ -192,7 +192,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
     const ex = exercises.find((e) => e.id === id);
     if (!ex) return;
     await supabase
-      .from("exercises")
+      .from("pet_exercises")
       .update({ is_active: !ex.isActive })
       .eq("id", id);
     await loadExercises();
@@ -200,7 +200,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
 
   const markExerciseCompleted = async (id: string, scheduledTime: string) => {
     if (!user) return;
-    await supabase.from("completions").upsert({
+    await supabase.from("pet_completions").upsert({
       user_id: user.id,
       item_type: "exercise",
       item_id: id,
@@ -214,7 +214,7 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
       if (!user) return null;
       const today = formatLocalDate(new Date());
       const { data } = await supabase
-        .from("completions")
+        .from("pet_completions")
         .select("*")
         .eq("item_id", id)
         .eq("item_type", "exercise")

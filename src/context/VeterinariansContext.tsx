@@ -51,7 +51,7 @@ export function VeterinariansProvider({ children }: Props) {
     }
     try {
       const { data, error } = await supabase
-        .from("veterinarians")
+        .from("pet_veterinarians")
         .select("*")
         .eq("user_id", user.id)
         .order("dog_name", { ascending: true });
@@ -84,7 +84,7 @@ export function VeterinariansProvider({ children }: Props) {
 
   const addVeterinarian = async (data: Omit<Veterinarian, "id" | "userId">) => {
     if (!user) return;
-    const { error } = await supabase.from("veterinarians").insert({
+    const { error } = await supabase.from("pet_veterinarians").insert({
       user_id: user.id,
       dog_id: data.dogId,
       dog_name: data.dogName,
@@ -105,7 +105,7 @@ export function VeterinariansProvider({ children }: Props) {
   ) => {
     if (!user) return;
     const { error } = await supabase
-      .from("veterinarians")
+      .from("pet_veterinarians")
       .update({
         dog_id: data.dogId,
         dog_name: data.dogName,
@@ -125,7 +125,7 @@ export function VeterinariansProvider({ children }: Props) {
   const deleteVeterinarian = async (id: string) => {
     if (!user) return;
     const { error } = await supabase
-      .from("veterinarians")
+      .from("pet_veterinarians")
       .delete()
       .eq("id", id)
       .eq("user_id", user.id);

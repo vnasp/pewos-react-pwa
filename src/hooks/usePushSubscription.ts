@@ -41,7 +41,7 @@ export function usePushSubscription() {
         const sub = subscription.toJSON();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const db = supabase as any;
-        await db.from("push_subscriptions").upsert(
+        await db.from("pet_push_subscriptions").upsert(
           {
             user_id: user.id,
             endpoint: sub.endpoint,

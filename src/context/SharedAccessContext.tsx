@@ -52,7 +52,7 @@ export function SharedAccessProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { data, error } = await supabase
-        .from("shared_access")
+        .from("pet_shared_access")
         .select("*")
         .or(`owner_id.eq.${user.id},shared_with_id.eq.${user.id}`);
       if (error) throw error;
@@ -64,7 +64,7 @@ export function SharedAccessProvider({ children }: { children: ReactNode }) {
 
   const sendInvitation = async (email: string) => {
     if (!user) return;
-    const { error } = await supabase.from("shared_access").insert({
+    const { error } = await supabase.from("pet_shared_access").insert({
       owner_id: user.id,
       shared_with_email: email,
       status: "pending",
@@ -76,7 +76,7 @@ export function SharedAccessProvider({ children }: { children: ReactNode }) {
   const acceptInvitation = async (id: string) => {
     if (!user) return;
     const { error } = await supabase
-      .from("shared_access")
+      .from("pet_shared_access")
       .update({ status: "accepted", shared_with_id: user.id })
       .eq("id", id);
     if (error) throw error;
@@ -85,7 +85,7 @@ export function SharedAccessProvider({ children }: { children: ReactNode }) {
 
   const rejectInvitation = async (id: string) => {
     const { error } = await supabase
-      .from("shared_access")
+      .from("pet_shared_access")
       .update({ status: "rejected" })
       .eq("id", id);
     if (error) throw error;
@@ -94,7 +94,7 @@ export function SharedAccessProvider({ children }: { children: ReactNode }) {
 
   const revokeAccess = async (id: string) => {
     const { error } = await supabase
-      .from("shared_access")
+      .from("pet_shared_access")
       .delete()
       .eq("id", id);
     if (error) throw error;

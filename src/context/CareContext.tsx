@@ -116,7 +116,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { data, error } = await supabase
-        .from("cares")
+        .from("pet_cares")
         .select("*, dogs(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -132,7 +132,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
 
   const addCare = async (c: Omit<Care, "id">) => {
     if (!user) return;
-    const { error } = await supabase.from("cares").insert({
+    const { error } = await supabase.from("pet_cares").insert({
       user_id: user.id,
       dog_id: c.dogId,
       type: c.type,
@@ -158,7 +158,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
   const updateCare = async (id: string, c: Omit<Care, "id">) => {
     if (!user) return;
     const { error } = await supabase
-      .from("cares")
+      .from("pet_cares")
       .update({
         dog_id: c.dogId,
         type: c.type,
@@ -184,7 +184,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteCare = async (id: string) => {
-    const { error } = await supabase.from("cares").delete().eq("id", id);
+    const { error } = await supabase.from("pet_cares").delete().eq("id", id);
     if (error) throw error;
     await loadCares();
   };
@@ -197,7 +197,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
     const care = cares.find((c) => c.id === id);
     if (!care) return;
     await supabase
-      .from("cares")
+      .from("pet_cares")
       .update({ is_active: !care.isActive })
       .eq("id", id);
     await loadCares();
@@ -205,7 +205,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
 
   const markCareCompleted = async (id: string, scheduledTime: string) => {
     if (!user) return;
-    await supabase.from("completions").upsert({
+    await supabase.from("pet_completions").upsert({
       user_id: user.id,
       item_type: "care",
       item_id: id,
@@ -219,7 +219,7 @@ export function CareProvider({ children }: { children: ReactNode }) {
       if (!user) return null;
       const today = formatLocalDate(new Date());
       const { data } = await supabase
-        .from("completions")
+        .from("pet_completions")
         .select("*")
         .eq("item_id", id)
         .eq("item_type", "care")

@@ -42,7 +42,7 @@ export function MealTimesProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { data, error } = await supabase
-        .from("meal_times")
+        .from("pet_meal_times")
         .select("*")
         .eq("user_id", user.id)
         .order("order_index", { ascending: true });
@@ -63,7 +63,7 @@ export function MealTimesProvider({ children }: { children: ReactNode }) {
 
   const addMealTime = async (m: Omit<MealTime, "id" | "userId">) => {
     if (!user) return;
-    const { error } = await supabase.from("meal_times").insert({
+    const { error } = await supabase.from("pet_meal_times").insert({
       user_id: user.id,
       name: m.name,
       time: m.time,
@@ -78,7 +78,7 @@ export function MealTimesProvider({ children }: { children: ReactNode }) {
     m: Omit<MealTime, "id" | "userId">,
   ) => {
     const { error } = await supabase
-      .from("meal_times")
+      .from("pet_meal_times")
       .update({ name: m.name, time: m.time, order_index: m.order })
       .eq("id", id);
     if (error) throw error;
@@ -86,7 +86,7 @@ export function MealTimesProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteMealTime = async (id: string) => {
-    const { error } = await supabase.from("meal_times").delete().eq("id", id);
+    const { error } = await supabase.from("pet_meal_times").delete().eq("id", id);
     if (error) throw error;
     await loadMealTimes();
   };
@@ -97,7 +97,7 @@ export function MealTimesProvider({ children }: { children: ReactNode }) {
     await Promise.all(
       reordered.map((m, i) =>
         supabase
-          .from("meal_times")
+          .from("pet_meal_times")
           .update({ order_index: i + 1 })
           .eq("id", m.id),
       ),

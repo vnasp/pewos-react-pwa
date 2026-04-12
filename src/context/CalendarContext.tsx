@@ -102,7 +102,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
       }
 
       const { data, error } = await supabase
-        .from("appointments")
+        .from("pet_appointments")
         .select("*, dogs(name)")
         .order("date", { ascending: true });
 
@@ -119,7 +119,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
 
   const addAppointment = async (a: Omit<Appointment, "id">) => {
     if (!user) return;
-    const { error } = await supabase.from("appointments").insert({
+    const { error } = await supabase.from("pet_appointments").insert({
       user_id: user.id,
       dog_id: a.dogId,
       type: a.type,
@@ -141,7 +141,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
   const updateAppointment = async (id: string, a: Omit<Appointment, "id">) => {
     if (!user) return;
     const { error } = await supabase
-      .from("appointments")
+      .from("pet_appointments")
       .update({
         dog_id: a.dogId,
         type: a.type,
@@ -163,7 +163,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteAppointment = async (id: string) => {
-    const { error } = await supabase.from("appointments").delete().eq("id", id);
+    const { error } = await supabase.from("pet_appointments").delete().eq("id", id);
     if (error) throw error;
     await loadAppointments();
   };
@@ -183,7 +183,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     scheduledTime: string,
   ) => {
     if (!user) return;
-    await supabase.from("completions").upsert({
+    await supabase.from("pet_completions").upsert({
       user_id: user.id,
       item_type: "appointment",
       item_id: id,
@@ -197,7 +197,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
       if (!user) return null;
       const today = formatLocalDate(new Date());
       const { data } = await supabase
-        .from("completions")
+        .from("pet_completions")
         .select("*")
         .eq("item_id", id)
         .eq("item_type", "appointment")

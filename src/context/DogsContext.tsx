@@ -48,7 +48,7 @@ export function DogsProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { data, error } = await supabase
-        .from("dogs")
+        .from("pet_dogs")
         .select("*")
         .order("created_at", { ascending: true });
       if (error) throw error;
@@ -60,7 +60,7 @@ export function DogsProvider({ children }: { children: ReactNode }) {
 
   const addDog = async (dog: Omit<Dog, "id">) => {
     if (!user) return;
-    const { error } = await supabase.from("dogs").insert({
+    const { error } = await supabase.from("pet_dogs").insert({
       user_id: user.id,
       name: dog.name,
       breed: dog.breed,
@@ -75,7 +75,7 @@ export function DogsProvider({ children }: { children: ReactNode }) {
 
   const updateDog = async (id: string, dog: Omit<Dog, "id">) => {
     const { error } = await supabase
-      .from("dogs")
+      .from("pet_dogs")
       .update({
         name: dog.name,
         breed: dog.breed,
@@ -90,7 +90,7 @@ export function DogsProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteDog = async (id: string) => {
-    const { error } = await supabase.from("dogs").delete().eq("id", id);
+    const { error } = await supabase.from("pet_dogs").delete().eq("id", id);
     if (error) throw error;
     await loadDogs();
   };

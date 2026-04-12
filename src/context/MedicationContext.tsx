@@ -74,7 +74,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { data, error } = await supabase
-        .from("medications")
+        .from("pet_medications")
         .select("*, dogs(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -90,7 +90,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
 
   const addMedication = async (m: Omit<Medication, "id">) => {
     if (!user) return;
-    const { error } = await supabase.from("medications").insert({
+    const { error } = await supabase.from("pet_medications").insert({
       user_id: user.id,
       dog_id: m.dogId,
       name: m.name,
@@ -114,7 +114,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
   const updateMedication = async (id: string, m: Omit<Medication, "id">) => {
     if (!user) return;
     const { error } = await supabase
-      .from("medications")
+      .from("pet_medications")
       .update({
         dog_id: m.dogId,
         name: m.name,
@@ -138,7 +138,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteMedication = async (id: string) => {
-    const { error } = await supabase.from("medications").delete().eq("id", id);
+    const { error } = await supabase.from("pet_medications").delete().eq("id", id);
     if (error) throw error;
     await loadMedications();
   };
@@ -153,7 +153,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
     const med = medications.find((m) => m.id === id);
     if (!med) return;
     await supabase
-      .from("medications")
+      .from("pet_medications")
       .update({ is_active: !med.isActive })
       .eq("id", id);
     await loadMedications();
@@ -161,7 +161,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
 
   const markMedicationCompleted = async (id: string, scheduledTime: string) => {
     if (!user) return;
-    await supabase.from("completions").upsert({
+    await supabase.from("pet_completions").upsert({
       user_id: user.id,
       item_type: "medication",
       item_id: id,
@@ -175,7 +175,7 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
       if (!user) return null;
       const today = formatLocalDate(new Date());
       const { data } = await supabase
-        .from("completions")
+        .from("pet_completions")
         .select("*")
         .eq("item_id", id)
         .eq("item_type", "medication")
