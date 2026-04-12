@@ -75,12 +75,12 @@ export function MedicationProvider({ children }: { children: ReactNode }) {
       }
       const { data, error } = await supabase
         .from("pet_medications")
-        .select("*, dogs(name)")
+        .select("*, pet_dogs(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setMedications(
         (data ?? []).map((row: any) =>
-          mapMedication({ ...row, dog_name: row.dogs?.name }),
+          mapMedication({ ...row, dog_name: row.pet_dogs?.name }),
         ),
       );
     } finally {

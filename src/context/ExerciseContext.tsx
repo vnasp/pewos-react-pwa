@@ -114,12 +114,12 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
       }
       const { data, error } = await supabase
         .from("pet_exercises")
-        .select("*, dogs(name)")
+        .select("*, pet_dogs(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setExercises(
         (data ?? []).map((row: any) =>
-          mapExercise({ ...row, dog_name: row.dogs?.name }),
+          mapExercise({ ...row, dog_name: row.pet_dogs?.name }),
         ),
       );
     } finally {

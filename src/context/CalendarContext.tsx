@@ -103,13 +103,13 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
 
       const { data, error } = await supabase
         .from("pet_appointments")
-        .select("*, dogs(name)")
+        .select("*, pet_dogs(name)")
         .order("date", { ascending: true });
 
       if (error) throw error;
       setAppointments(
         (data ?? []).map((row: any) =>
-          mapAppointment({ ...row, dog_name: row.dogs?.name }),
+          mapAppointment({ ...row, dog_name: row.pet_dogs?.name }),
         ),
       );
     } finally {

@@ -117,12 +117,12 @@ export function CareProvider({ children }: { children: ReactNode }) {
       }
       const { data, error } = await supabase
         .from("pet_cares")
-        .select("*, dogs(name)")
+        .select("*, pet_dogs(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setCares(
         (data ?? []).map((row: any) =>
-          mapCare({ ...row, dog_name: row.dogs?.name }),
+          mapCare({ ...row, dog_name: row.pet_dogs?.name }),
         ),
       );
     } finally {
